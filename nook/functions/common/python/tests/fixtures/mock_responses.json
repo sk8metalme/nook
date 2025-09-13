@@ -1,0 +1,41 @@
+{
+  "claude_responses": {
+    "simple_generation": {
+      "content": [{"text": "This is a test response from Claude."}]
+    },
+    "paper_summary": {
+      "content": [{
+        "text": "## Summary\n\n**Title:** Sample Research Paper\n\n**Key Findings:** This paper demonstrates innovative approaches to machine learning.\n\n**Methodology:** The authors used a novel neural network architecture.\n\n**Implications:** These findings could revolutionize the field."
+      }]
+    },
+    "technical_explanation": {
+      "content": [{
+        "text": "Neural networks are computational models inspired by biological neural systems. They consist of interconnected layers of artificial neurons that process information through weighted connections.\n\n**Architecture Components:**\n- Input layers receive data\n- Hidden layers perform transformations\n- Output layers produce results\n\n**Training Process:**\nNeural networks learn through backpropagation, adjusting weights based on error gradients."
+      }]
+    },
+    "error_response": {
+      "error": {
+        "type": "rate_limit_error",
+        "message": "Rate limit exceeded"
+      }
+    }
+  },
+  "gemini_responses": {
+    "simple_generation": {
+      "candidates": [{
+        "content": {
+          "parts": [{"text": "This is a test response from Gemini."}]
+        }
+      }]
+    },
+    "paper_summary": {
+      "candidates": [{
+        "content": {
+          "parts": [{
+            "text": "## Summary\n\n**Title:** Sample Research Paper\n\n**Key Findings:** This paper demonstrates innovative approaches to machine learning.\n\n**Methodology:** The authors used a novel neural network architecture.\n\n**Implications:** These findings could revolutionize the field."
+          }]
+        }
+      }]
+    }
+  }
+}
