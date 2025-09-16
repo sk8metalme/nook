@@ -8,10 +8,10 @@ allowing seamless switching between different providers.
 import os
 from typing import Any, Union
 from .gemini_client import GeminiClient, GeminiClientConfig, create_client as create_gemini_client
-from .claude_client import ClaudeClient, ClaudeClientConfig, create_client as create_claude_client
+from .claude_cli_client import ClaudeCLIClient, ClaudeCLIConfig, create_client as create_claude_cli_client
 
 
-def create_client(config: dict[str, Any] | None = None, **kwargs) -> Union[GeminiClient, ClaudeClient]:
+def create_client(config: dict[str, Any] | None = None, **kwargs) -> Union[GeminiClient, ClaudeCLIClient]:
     """
     Create an AI client based on environment configuration.
 
@@ -29,7 +29,7 @@ def create_client(config: dict[str, Any] | None = None, **kwargs) -> Union[Gemin
 
     Returns
     -------
-    Union[GeminiClient, ClaudeClient]
+    Union[GeminiClient, ClaudeCLIClient]
         The configured AI client.
 
     Examples
@@ -37,7 +37,7 @@ def create_client(config: dict[str, Any] | None = None, **kwargs) -> Union[Gemin
     # Use default client (Gemini)
     client = create_client()
 
-    # Force Claude client
+    # Force Claude CLI client
     os.environ['AI_CLIENT_TYPE'] = 'claude'
     client = create_client()
 
@@ -48,7 +48,7 @@ def create_client(config: dict[str, Any] | None = None, **kwargs) -> Union[Gemin
     client_type = os.environ.get("AI_CLIENT_TYPE", "gemini").lower()
 
     if client_type == "claude":
-        return _create_claude_client(config, **kwargs)
+        return _create_claude_cli_client(config, **kwargs)
     elif client_type == "gemini":
         return _create_gemini_client(config, **kwargs)
     else:
@@ -60,18 +60,17 @@ def _create_gemini_client(config: dict[str, Any] | None = None, **kwargs) -> Gem
     return create_gemini_client(config, **kwargs)
 
 
-def _create_claude_client(config: dict[str, Any] | None = None, **kwargs) -> ClaudeClient:
-    """Create a Claude client with the given configuration."""
+def _create_claude_cli_client(config: dict[str, Any] | None = None, **kwargs) -> ClaudeCLIClient:
+    """Create a Claude CLI client with the given configuration."""
     if config:
-        # Convert config dict to ClaudeClientConfig
-        claude_config = ClaudeClientConfig(
+        # Convert config dict to ClaudeCLIConfig
+        claude_config = ClaudeCLIConfig(
             model=config.get("model", "claude-3-5-sonnet-20241022"),
             temperature=config.get("temperature", 1.0),
-            top_p=config.get("top_p", 0.95),
-            max_output_tokens=config.get("max_output_tokens", 8192),
-            timeout=config.get("timeout", 60000)
+            max_tokens=config.get("max_tokens", 8192),
+            timeout=config.get("timeout", 60)
         )
     else:
         claude_config = None
 
-    return create_claude_client(claude_config, **kwargs)
+    return create_claude_cli_client(claude_config, **kwargs)

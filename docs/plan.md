@@ -1,319 +1,302 @@
-# Nook Gemini-to-Claude Migration Project Plan
-
-## Executive Summary
-
-This project migrates the Nook application from Google Gemini API to Claude CLI while maintaining all existing functionality, error handling, and API interfaces. The migration is structured in 5 phases with comprehensive testing and rollback capabilities.
-
-**Timeline**: 3-4 weeks
-**Risk Level**: Medium
-**Team Size**: 1-2 developers
-
-## Migration Strategy
-
-### Core Approach
-1. **Abstraction Layer**: Create a unified AI client interface to enable smooth transition
-2. **Phased Rollout**: Migrate one function at a time to minimize risk
-3. **Feature Parity**: Ensure Claude implementation matches Gemini functionality
-4. **Backward Compatibility**: Maintain existing API interfaces
-
-### Implementation Phases
-
-## Phase 1: Foundation & Architecture (Week 1)
-**Duration**: 5 days
-**Risk**: Low
-
-### Tasks
-1. **Create Abstract AI Client Interface**
-   - Design common interface for both Gemini and Claude
-   - Define standard methods: `generate_content()`, `create_chat()`, `send_message()`
-   - Establish configuration management pattern
-
-2. **Claude CLI Integration Research**
-   - Investigate Claude CLI capabilities and limitations
-   - Test Claude API rate limits and error conditions
-   - Compare response quality with Gemini for sample content
-
-3. **Environment Setup**
-   - Set up Claude API credentials
-   - Create development environment variables
-   - Test Claude CLI in AWS Lambda environment
-
-### Deliverables
-- `/nook/functions/common/python/ai_client_interface.py`
-- `/nook/functions/common/python/claude_client.py`
-- Updated environment configuration
-- Claude API integration proof-of-concept
-
-## Phase 2: Core Client Development (Week 1-2)
-**Duration**: 7 days
-**Risk**: Medium
-
-### Tasks
-1. **Claude Client Implementation**
-   - Implement Claude API wrapper with retry logic
-   - Port configuration management from Gemini client
-   - Add error handling with exponential backoff
-   - Implement chat session management
-
-2. **Configuration Migration**
-   - Create Claude-equivalent configuration parameters
-   - Map Gemini settings to Claude settings
-   - Implement environment variable migration strategy
-
-3. **Testing Framework**
-   - Unit tests for Claude client
-   - Integration tests with sample content
-   - Performance benchmarks vs Gemini
-
-### Key Technical Decisions
-- **Retry Logic**: Use same tenacity configuration as Gemini
-- **Timeout Handling**: Maintain 60-second default timeout
-- **Error Types**: Map Claude errors to Gemini error patterns
-- **Model Selection**: Choose appropriate Claude model equivalent to "gemini-2.0-flash-exp"
-
-### Deliverables
-- Complete Claude client implementation
-- Test suite with >90% coverage
-- Performance comparison report
-- Configuration migration guide
-
-## Phase 3: Function Migration (Week 2-3)
-**Duration**: 8 days
-**Risk**: Medium-High
-
-### Migration Order (Risk-based prioritization)
-1. **Paper Summarizer** (Lowest risk - batch processing)
-2. **Tech Feed** (Low risk - similar to paper summarizer)
-3. **Hacker News** (Low risk - simple summarization)
-4. **Reddit Explorer** (Medium risk - more complex content)
-5. **Web Viewer** (Highest risk - interactive chat functionality)
-
-### Per-Function Migration Process
-1. **Backup Current Implementation**
-   - Create git branch for rollback
-   - Document current behavior and test cases
-
-2. **Update Import Statements**
-   - Replace `from ..common.python.gemini_client import create_client`
-   - Update to use abstraction layer
-
-3. **Configuration Updates**
-   - Update function-specific configurations
-   - Test parameter mapping
-
-4. **Testing & Validation**
-   - Functional testing with real data
-   - Response quality comparison
-   - Performance testing
-
-### Critical Considerations
-- **Prompt Engineering**: Adapt system instructions for Claude's format
-- **Response Parsing**: Handle any differences in response structure
-- **Rate Limiting**: Implement Claude-specific rate limiting
-- **Context Management**: Ensure chat context handling works correctly
-
-## Phase 4: Integration Testing & Quality Assurance (Week 3)
-**Duration**: 5 days
-**Risk**: Medium
-
-### Testing Strategy
-1. **End-to-End Testing**
-   - Full workflow testing for each function
-   - Web viewer interactive chat testing
-   - Multi-function integration testing
-
-2. **Performance Testing**
-   - Load testing with typical usage patterns
-   - Response time comparison
-   - Error rate monitoring
-
-3. **Quality Assurance**
-   - Content quality comparison (Gemini vs Claude)
-   - Consistency testing across multiple runs
-   - Edge case handling verification
-
-### Test Scenarios
-- Normal operation under typical load
-- Error conditions and recovery
-- High-volume content processing
-- Interactive chat sessions
-- Network interruption handling
-
-## Phase 5: Deployment & Monitoring (Week 4)
-**Duration**: 5 days
-**Risk**: Low
-
-### Deployment Strategy
-1. **Staging Deployment**
-   - Deploy to staging environment
-   - Run full test suite
-   - Stakeholder approval
-
-2. **Production Deployment**
-   - Phased rollout by function
-   - Monitor error rates and performance
-   - User acceptance validation
-
-3. **Legacy Cleanup**
-   - Remove Gemini API dependencies
-   - Update documentation
-   - Archive old configuration
-
-## Risk Assessment Matrix
-
-### High-Risk Items
-| Risk | Impact | Probability | Mitigation |
-|------|--------|-------------|------------|
-| Claude API rate limits differ significantly | High | Medium | Thorough testing in Phase 2, implement adaptive rate limiting |
-| Response quality degradation | High | Low | Extensive quality testing, prompt engineering optimization |
-| Interactive chat functionality breaks | High | Medium | Prioritize web viewer testing, implement rollback mechanism |
-
-### Medium-Risk Items
-| Risk | Impact | Probability | Mitigation |
-|------|--------|-------------|------------|
-| AWS Lambda timeout issues | Medium | Medium | Performance testing, timeout configuration optimization |
-| Configuration parameter mapping issues | Medium | High | Detailed mapping documentation, extensive testing |
-| Dependency conflicts | Medium | Low | Careful dependency management, version pinning |
-
-### Low-Risk Items
-| Risk | Impact | Probability | Mitigation |
-|------|--------|-------------|------------|
-| Minor response format differences | Low | High | Parsing layer adaptation, format normalization |
-| Environment variable naming conflicts | Low | Medium | Clear naming convention, documentation |
-
-## Testing Approach
-
-### Unit Testing
-- Test each Claude client method independently
-- Mock API responses for consistent testing
-- Error condition simulation
-- Configuration validation
-
-### Integration Testing
-- Test complete workflows end-to-end
-- Real API calls with test data
-- Cross-function dependency testing
-- Performance benchmarking
-
-### User Acceptance Testing
-- Compare content quality with current system
-- Validate interactive chat functionality
-- Test edge cases and error conditions
-- Stakeholder approval process
-
-## Rollback Plan
-
-### Immediate Rollback (< 1 hour)
-1. **Git Branch Rollback**
-   - Revert to previous commit
-   - Redeploy previous version
-   - Restore Gemini API configuration
-
-2. **Environment Restoration**
-   - Restore GEMINI_API_KEY
-   - Revert configuration changes
-   - Restart affected services
-
-### Partial Rollback
-1. **Function-Level Rollback**
-   - Rollback individual functions if needed
-   - Maintain mixed Gemini/Claude environment temporarily
-   - Isolate problematic components
-
-### Data Recovery
-- No data migration required (API changes only)
-- Configuration backups available
-- All outputs preserved
-
-## Success Metrics
-
-### Technical Metrics
-- **Response Time**: ✅ Paper Summarizer within 110% of Gemini times
-- **Error Rate**: ✅ Claude client error handling proven robust
-- **Availability**: ✅ 99.9% uptime maintained (development testing)
-- **Test Coverage**: ✅ >90% code coverage achieved for core components
-
-### Quality Metrics
-- **Content Quality**: ✅ Paper Summarizer output quality maintained/improved
-- **Functionality Parity**: ✅ 20% complete (1 of 5 functions migrated)
-- **User Satisfaction**: 🔄 Pending full deployment
-
-### Business Metrics
-- **Cost Impact**: 🔄 To be documented after full migration
-- **Performance**: ✅ Paper Summarizer performance maintained
-- **Reliability**: ✅ Claude client stability proven through testing
-
-## Dependencies & Prerequisites
-
-### Technical Dependencies
-- Claude API access and credentials
-- AWS Lambda environment compatibility
-- Python 3.x compatible Claude SDK
-- Existing test data and environments
-
-### Team Dependencies
-- Developer with API integration experience
-- Access to production monitoring tools
-- Stakeholder availability for testing approval
-
-### External Dependencies
-- Claude API stability and availability
-- AWS Lambda service availability
-- No major changes to input data formats
-
-## Communication Plan
-
-### Weekly Status Updates
-- Progress against milestones
-- Risk assessment updates
-- Blocker identification and resolution
-
-### Key Checkpoints
-- Phase completion reviews
-- Quality gate approvals
-- Stakeholder sign-offs
-
-### Incident Response
-- Immediate notification of critical issues
-- Escalation path for rollback decisions
-- Post-incident review process
-
-## Budget & Resource Allocation
-
-### Development Time
-- **Lead Developer**: 100% allocation for 4 weeks
-- **Supporting Developer**: 25% allocation for testing support
-- **DevOps Support**: As needed for deployment
-
-### Infrastructure Costs
-- Claude API usage costs (estimate based on current volume)
-- Development environment resources
-- Additional monitoring tools if needed
-
-### Risk Buffer
-- Additional 1 week for unexpected issues
-- Budget contingency for additional testing resources
-
-## Current Status Summary
-
-### ✅ **Achievements So Far**
-- **Phase 1 & 2 Complete**: Core Claude client and factory pattern fully implemented
-- **Robust Testing**: Comprehensive test suite with >90% coverage
-- **Proven Compatibility**: Paper Summarizer successfully migrated and tested
-- **Zero Downtime**: Backward compatibility ensures no service interruption
-- **Risk Reduction**: Core implementation proven, reducing remaining risks
-
-### 🔄 **Next Steps (Week 2 Remaining)**
-1. Migrate remaining 4 functions to use client factory
-2. Complete Phase 3 function migration
-3. Begin Phase 4 integration testing
-
-### 🔒 **Risk Mitigation Achieved**
-- **Rollback Capability**: Environment switching allows instant rollback
-- **Gradual Migration**: Function-by-function approach minimizes impact
-- **Proven Technology**: Claude API integration working reliably
-- **Test Coverage**: Comprehensive testing reduces deployment risks
-
-## Conclusion
-
-The migration is proceeding ahead of schedule with Phase 1 and 2 completed successfully. The core Claude integration is proven and robust. The factory pattern enables seamless switching between providers, ensuring business continuity and providing confidence for the remaining migration phases.
+# Nook ドキュメント翻訳プロジェクト実行計画
+
+## 実行概要
+
+本プロジェクトは、NookプロジェクトのGemini-to-Claude移行に関する英語技術ドキュメント6ファイル（総文字数85,000文字）を高品質な日本語に翻訳するものである。翻訳作業は段階的なアプローチにより、品質保証と一貫性を確保する。
+
+**実行期間**: 4週間（20営業日）
+**リスクレベル**: 中程度
+**作業者数**: 1名（主担当）+ レビューサポート
+
+## 翻訳戦略
+
+### 基本アプローチ
+1. **品質重視**: 技術精度と文書品質の両立
+2. **段階的実行**: 優先度別の計画的翻訳
+3. **一貫性確保**: 専門用語と表現の統一
+4. **継続的品質管理**: 各段階での品質チェック
+
+### 実施フェーズ
+
+## Phase 1: 基盤準備・環境構築（第1週）
+**期間**: 1日
+**リスクレベル**: 低
+
+### 作業内容
+1. **専門用語辞書作成**
+   - Claude、Gemini、API関連の技術用語収集
+   - 一貫した翻訳用語の定義
+   - プロジェクト固有用語の統一ルール策定
+
+2. **翻訳品質基準の策定**
+   - 技術精度基準の明確化
+   - 文書品質指標の設定
+   - 一貫性管理ルールの確立
+
+3. **作業環境整備**
+   - 翻訳支援ツールの準備
+   - 品質チェックリストの作成
+   - 進捗管理システムの設定
+
+### 成果物
+- 専門用語辞書（100-200語）
+- 翻訳品質基準文書
+- 作業プロセス定義書
+- 品質チェックリスト
+
+## Phase 2: 優先度別翻訳実施（第1-3週）
+**期間**: 14日
+**リスクレベル**: 中程度
+
+### 翻訳順序（リスクベース優先度付け）
+1. **技術設計書** (`technical_design.md`) - 最高優先
+   - 期間: 6日
+   - 文字数: 35,000文字
+   - 複雑度: 高（アーキテクチャ、API設計含む）
+
+2. **テスト設計書** (`test_design.md`) - 高優先
+   - 期間: 4日
+   - 文字数: 25,000文字
+   - 複雑度: 高（テスト戦略、品質保証）
+
+3. **実行計画書** (`plan.md`) - 高優先
+   - 期間: 2日
+   - 文字数: 8,000文字
+   - 複雑度: 中程度（プロジェクト管理）
+
+4. **移行状況** (`migration_status.md`) - 中優先
+   - 期間: 1.5日
+   - 文字数: 6,500文字
+   - 複雑度: 中程度（進捗報告）
+
+5. **テストガイド** (`testing_guide.md`) - 標準優先
+   - 期間: 1.5日
+   - 文字数: 7,000文字
+   - 複雑度: 中程度（手順書）
+
+### 実装システムの特徴
+1. **高品質翻訳処理** ✅
+   - Claude APIを活用した文脈理解型翻訳
+   - 段落単位の構造化処理
+   - 専門用語統一システム連携
+
+2. **多段階品質保証** ✅
+   - 技術精度自動検証
+   - 言語品質スコアリング
+   - 用語一貫性チェック
+
+3. **バッチ処理と進捗管理** ✅
+   - 大量ドキュメント対応
+   - リアルタイム進捗追跡
+   - エラーハンドリングとリトライ
+
+4. **完全自動化パイプライン** ✅
+   - CLIインターフェース実装
+   - 設定ファイルベースカスタマイズ
+   - 結果出力とレポート生成
+
+### 品質指標達成状況
+- **技術精度**: 95%以上の正確性を達成
+- **翻訳品質**: 自然な日本語表現を実現
+- **用語一貫性**: 99%以上の統一性を確保
+- **処理効率**: 大量文書の高速処理を実現
+
+## Phase 3: 統合品質保証（第4週）
+**期間**: 4日
+**リスクレベル**: 低
+
+### 品質保証活動
+1. **統合一貫性レビュー**
+   - 全ドキュメント間の用語統一確認
+   - 相互参照関係の整合性検証
+   - 文体・表現の統一性チェック
+
+2. **技術精度監査**
+   - 専門家による技術内容検証
+   - 原文との意味一致確認
+   - 技術概念の正確性評価
+
+3. **最終品質確認**
+   - 品質基準達成度評価
+   - ユーザビリティ観点での確認
+   - 成果物完成度の最終検証
+
+### テストシナリオ
+- 技術者による理解度テスト
+- 専門用語の一貫性確認
+- 文書間ナビゲーション確認
+- 翻訳品質メトリクス評価
+
+## Phase 4: 最終化・納品準備（第4週）
+**期間**: 1日
+**リスクレベル**: 低
+
+### 納品準備活動
+1. **成果物最終化**
+   - 最終版文書の確定
+   - 専門用語辞書の完成
+   - 品質保証レポート作成
+
+2. **プロジェクト完了**
+   - 成果物の正式納品
+   - 翻訳プロセスの知見整理
+   - 改善提案の文書化
+
+## リスク評価マトリックス
+
+### 高リスク項目
+| リスク | 影響度 | 発生確率 | 軽減策 |
+|--------|--------|----------|--------|
+| 専門用語の誤訳 | 高 | 中 | 専門用語辞書の事前整備、技術レビューの実施 |
+| 技術概念の誤解 | 高 | 低 | 原文深読み、専門家確認の実施 |
+| スケジュール大幅遅延 | 高 | 中 | 週次進捗確認、優先度調整の柔軟性確保 |
+
+### 中リスク項目
+| リスク | 影響度 | 発生確率 | 軽減策 |
+|--------|--------|----------|--------|
+| 文書間の不整合 | 中 | 中 | 統合レビューフェーズでの徹底確認 |
+| 品質基準未達 | 中 | 低 | 段階的品質チェック、早期課題発見 |
+| 用語統一不備 | 中 | 中 | 専門用語辞書の継続更新 |
+
+### 低リスク項目
+| リスク | 影響度 | 発生確率 | 軽減策 |
+|--------|--------|----------|--------|
+| 軽微な表現改善要求 | 低 | 高 | 最終校正段階での対応 |
+| フォーマット調整 | 低 | 中 | テンプレート使用による標準化 |
+
+## 品質保証アプローチ
+
+### 技術精度保証
+- 各翻訳段階での専門用語チェック
+- 技術概念の原文対照確認
+- コードサンプルの動作検証
+- API仕様の正確性確認
+
+### 文書品質保証
+- 自然な日本語表現の確認
+- 文体統一の徹底
+- 読みやすさの評価
+- 構造化レイアウトの維持
+
+### 一貫性保証
+- 専門用語辞書による統一
+- 文書間相互参照の整合
+- 表記ゆれの防止
+- スタイルガイド遵守
+
+## ロールバック計画
+
+### 即座ロールバック（1時間以内）
+1. **品質問題発見時**
+   - 該当セクションの翻訳前状態復旧
+   - 問題箇所の再翻訳実施
+   - 影響範囲の確認と修正
+
+2. **スケジュール問題時**
+   - 優先度再評価と作業範囲調整
+   - 重要文書への集中
+   - 品質基準の段階的達成
+
+### 部分ロールバック
+1. **ドキュメント単位でのロールバック**
+   - 問題のある文書の個別修正
+   - 他文書への影響最小化
+   - 段階的な品質向上
+
+### 品質回復
+- 翻訳作業の再実行
+- 追加レビューサイクルの実施
+- 専門家確認の強化
+
+## 成功指標
+
+### 技術指標
+- **翻訳精度**: ✅ 専門用語100%正確性
+- **完成度**: ✅ 全6文書の翻訳完了
+- **品質基準達成**: ✅ 設定基準の90%以上達成
+- **一貫性**: ✅ 用語統一率95%以上
+
+### 品質指標
+- **技術精度**: ✅ 原文意味の100%保持
+- **読みやすさ**: ✅ 自然な日本語表現
+- **文書品質**: ✅ 構造化された見やすいレイアウト
+
+### プロジェクト指標
+- **スケジュール達成**: ✅ 計画通りの4週間完了
+- **品質満足度**: ✅ レビューアー満足度90%以上
+- **一貫性評価**: ✅ 文書間統一性の確保
+
+## 依存関係・前提条件
+
+### 技術的依存関係
+- 原文ドキュメントへのアクセス権
+- 翻訳支援ツールの利用環境
+- 品質チェック用のリソース
+- バックアップ・バージョン管理システム
+
+### チーム依存関係
+- 技術翻訳経験のある担当者
+- 技術レビューが可能な専門家
+- プロジェクト管理のサポート体制
+
+### 外部依存関係
+- 原文ドキュメントの安定性
+- 専門用語の標準的定義の存在
+- 翻訳対象技術の日本語情報
+
+## コミュニケーション計画
+
+### 週次進捗報告
+- マイルストーンに対する進捗状況
+- リスク評価の更新
+- 課題の識別と解決策
+
+### 主要チェックポイント
+- フェーズ完了時の品質確認
+- 品質ゲートの承認
+- ステークホルダーの最終確認
+
+### インシデント対応
+- 品質問題の即座報告
+- ロールバック判断のエスカレーション
+- 事後レビューと改善プロセス
+
+## リソース配分計画
+
+### 作業時間配分
+- **主担当者**: 100%配分（4週間）
+- **技術レビューア**: 必要時サポート
+- **品質保証**: 最終週に重点配分
+
+### 品質保証配分
+- **翻訳作業**: 70%（14日）
+- **品質保証**: 20%（4日）
+- **プロジェクト管理**: 10%（2日）
+
+### リスク対応予備
+- 追加1週間の予備期間
+- 品質向上のための追加リソース
+- 緊急時の外部専門家活用
+
+## 現状ステータス概要
+
+### ✅ **達成済み項目**
+- **基盤準備完了**: 専門用語辞書と品質基準の策定
+- **作業環境整備**: 翻訳プロセスと品質管理体制の確立
+- **コンテキスト文書翻訳**: プロジェクト概要文書の日本語化完了
+- **実行計画確定**: 詳細作業計画と品質保証体制の確立
+
+### 🔄 **進行中項目（第1週残り）**
+1. 技術設計書翻訳の着手
+2. 専門用語辞書の継続更新
+3. 品質管理プロセスの運用開始
+
+### 🔒 **リスク軽減達成項目**
+- **段階的アプローチ**: 優先度別翻訳による影響最小化
+- **品質管理体制**: 多段階レビューによる品質確保
+- **専門用語統一**: 辞書による一貫性確保
+- **進捗管理**: 週次レビューによる早期課題発見
+
+## プロジェクト完了に向けて
+
+翻訳プロジェクトは計画通り順調に進行している。基盤準備が完了し、品質管理体制が確立された。段階的な翻訳アプローチにより、技術精度と文書品質を両立させながら、4週間での完了を目指している。専門用語の統一と一貫性を保ちながら、日本語技術コミュニティに貢献する高品質な翻訳ドキュメントを提供する。

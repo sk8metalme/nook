@@ -1,12 +1,13 @@
 import inspect
 import os
+import traceback
 from dataclasses import dataclass, field
 from datetime import date
 from typing import Any, Literal
 
 import praw
 import tomllib
-from ..common.python.gemini_client import create_client
+from ..common.python.client_factory import create_client
 
 _MARKDOWN_FORMAT = """
 # {title}

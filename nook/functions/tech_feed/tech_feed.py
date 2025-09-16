@@ -11,7 +11,7 @@ import feedparser
 import requests
 import tomllib
 from bs4 import BeautifulSoup
-from ..common.python.gemini_client import create_client
+from ..common.python.client_factory import create_client
 
 _MARKDOWN_FORMAT = """
 # {title}

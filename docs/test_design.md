@@ -1,28 +1,28 @@
-# Nook Gemini-to-Claude Migration Test Design Document
+# Nook Gemini-to-Claude移行テスト設計書
 
-## Executive Summary
+## エグゼクティブサマリー
 
-This document outlines a comprehensive yet practical test design for migrating the Nook application from Google Gemini API to Claude CLI. The test strategy follows the **SIMPLIFIED APPROACH** recommended by internal reviews, focusing on essential testing that provides production confidence within the 4-week timeline while avoiding over-engineering.
+この文書では、NookアプリケーションをGoogle Gemini APIからClaude CLIに移行するための包括的かつ実用的なテスト設計について説明します。テスト戦略は、内部レビューで推奨された**簡素化アプローチ**に従い、過度な設計を避けながら4週間のタイムライン内で本番環境への信頼性を提供する必須テストに焦点を当てています。
 
-**Key Testing Objectives:**
-- Ensure functional parity between Gemini and Claude implementations
-- Validate performance characteristics meet or exceed current standards
-- Establish confidence in rollback procedures and emergency protocols
-- Focus on 4 core functions: paper_summarizer, tech_feed, hacker_news, reddit_explorer
-- Defer complex viewer search functionality for phase 2
+**主要テスト目標:**
+- GeminiとClaude実装間の機能パリティの確保
+- パフォーマンス特性が現在の基準を満たすか上回ることの検証
+- ロールバック手順と緊急プロトコルへの信頼性確立
+- 4つのコア関数に焦点: paper_summarizer、tech_feed、hacker_news、reddit_explorer
+- 複雑なviewer検索機能はフェーズ2に延期
 
-**Testing Philosophy:**
-- **Manual testing first, automation second** - Start with human validation, automate high-value tests
-- **Risk-based prioritization** - Focus testing effort on high-impact, high-probability risks
-- **Practical over perfect** - Ensure production readiness without complex testing infrastructure
+**テスト哲学:**
+- **手動テスト優先、自動化は二次** - 人的検証から開始し、高価値テストを自動化
+- **リスクベース優先順位付け** - 高影響・高確率リスクにテスト労力を集中
+- **完璧より実用性** - 複雑なテストインフラなしで本番準備を確保
 
 ---
 
-## 1. Test Strategy for Simplified Migration
+## 1. 簡素化移行のテスト戦略
 
-### 1.1 Core Testing Principles
+### 1.1 コアテスト原則
 
-#### Focus Areas
+#### 重点領域
 1. **Core Functions Only (Phase 1)**
    - Paper Summarizer: Research paper analysis and summarization
    - Tech Feed: Technology news content generation
@@ -34,7 +34,7 @@ This document outlines a comprehensive yet practical test design for migrating t
    - Advanced chat capabilities
    - Multi-session conversation handling
 
-#### Testing Priorities
+#### テスト優先順位
 
 **Priority 1 (Critical - Must Pass)**
 - Core content generation functionality
@@ -54,7 +54,7 @@ This document outlines a comprehensive yet practical test design for migrating t
 - Performance optimization
 - Comprehensive logging validation
 
-### 1.2 Testing Approach Matrix
+### 1.2 テストアプローチマトリックス
 
 | Component | Manual Testing | Automated Testing | Validation Method |
 |-----------|---------------|-------------------|-------------------|
@@ -67,9 +67,9 @@ This document outlines a comprehensive yet practical test design for migrating t
 
 ---
 
-## 2. Unit Testing Framework
+## 2. ユニットテストフレームワーク
 
-### 2.1 Test Structure and Organization
+### 2.1 テスト構造と組織
 
 ```
 nook/
@@ -97,9 +97,9 @@ nook/
 │           └── expected_outputs.json
 ```
 
-### 2.2 Claude Client Unit Tests
+### 2.2 Claude Clientユニットテスト
 
-#### 2.2.1 Core Functionality Tests
+#### 2.2.1 コア機能テスト
 
 ```python
 # test_claude_client.py
@@ -241,7 +241,7 @@ class TestClaudeClient:
         assert mock_anthropic_client.messages.create.call_count == 2
 ```
 
-#### 2.2.2 Configuration and Error Handling Tests
+#### 2.2.2 設定とエラーハンドリングテスト
 
 ```python
 # test_config_manager.py
@@ -321,9 +321,9 @@ class TestErrorHandling:
         assert "authentication" in str(mapped_error).lower()
 ```
 
-### 2.3 Mock API Response Testing
+### 2.3 モックAPIレスポンステスト
 
-#### 2.3.1 Mock Response Fixtures
+#### 2.3.1 モックレスポンスフィクスチャ
 
 ```json
 // fixtures/mock_responses.json
@@ -365,7 +365,7 @@ class TestErrorHandling:
 }
 ```
 
-#### 2.3.2 Configuration Test Cases
+#### 2.3.2 設定テストケース
 
 ```json
 // fixtures/test_configurations.json
@@ -396,11 +396,11 @@ class TestErrorHandling:
 
 ---
 
-## 3. Integration Testing Strategy
+## 3. 統合テスト戦略
 
-### 3.1 End-to-End Function Testing
+### 3.1 エンドツーエンド関数テスト
 
-#### 3.1.1 Paper Summarizer Integration Tests
+#### 3.1.1 Paper Summarizer統合テスト
 
 ```python
 # test_paper_summarizer_integration.py
@@ -504,7 +504,7 @@ This work has become foundational for modern NLP models including BERT and GPT.
                     summarizer.process_papers(["1706.03762"])
 ```
 
-#### 3.1.2 Response Quality Comparison Testing
+#### 3.1.2 レスポンス品質比較テスト
 
 ```python
 # test_response_quality.py
@@ -618,9 +618,9 @@ class TestResponseQuality:
         assert True  # Placeholder for actual quality assertions
 ```
 
-### 3.2 Performance Benchmarking
+### 3.2 パフォーマンスベンチマーク
 
-#### 3.2.1 Response Time Testing
+#### 3.2.1 レスポンス時間テスト
 
 ```python
 # test_performance.py
@@ -761,11 +761,11 @@ class TestPerformance:
 
 ---
 
-## 4. Rollback Testing Procedures
+## 4. ロールバックテスト手順
 
-### 4.1 Environment Variable Switching Tests
+### 4.1 環境変数切替テスト
 
-#### 4.1.1 Provider Switching Test Suite
+#### 4.1.1 プロバイダー切替テストスイート
 
 ```python
 # test_rollback_procedures.py
@@ -949,9 +949,9 @@ class TestValidationProcedures:
                     client.generate_content("Test input")
 ```
 
-### 4.2 Emergency Rollback Procedures
+### 4.2 緊急ロールバック手順
 
-#### 4.2.1 Automated Rollback Script
+#### 4.2.1 自動ロールバックスクリプト
 
 ```python
 # scripts/emergency_rollback.py
@@ -1243,11 +1243,11 @@ if __name__ == "__main__":
 
 ---
 
-## 5. Quality Assurance Testing Framework
+## 5. 品質保証テストフレームワーク
 
-### 5.1 Content Quality Validation
+### 5.1 コンテンツ品質検証
 
-#### 5.1.1 Response Quality Metrics
+#### 5.1.1 レスポンス品質メトリクス
 
 ```python
 # test_content_quality.py
@@ -1552,7 +1552,7 @@ The announcement represents culmination of extensive research efforts and marks 
                 f"Claude quality significantly lower than Gemini for {scenario_name}: " \
                 f"Claude={claude_overall:.3f}, Gemini={gemini_overall:.3f}"
 
-### 5.2 Response Consistency Testing
+### 5.2 レスポンス一貫性テスト
 
 ```python
 # test_response_consistency.py
@@ -1634,12 +1634,12 @@ class TestResponseConsistency:
 
 ---
 
-## 6. Implementation Timeline and Testing Schedule
+## 6. 実装タイムラインとテストスケジュール
 
-### 6.1 4-Week Testing Timeline
+### 6.1 4週間テストタイムライン
 
-#### Week 1: Foundation Testing
-**Days 1-2: Unit Testing Setup**
+#### 第1週: 基盤テスト
+**1-2日目: ユニットテストセットアップ**
 - ✅ Set up testing framework and directory structure
 - ✅ Implement Claude client unit tests
 - ✅ Create mock API response fixtures
@@ -1651,8 +1651,8 @@ class TestResponseConsistency:
 - ✅ Implement simple rollback tests
 - ✅ Create test data fixtures
 
-#### Week 2: Core Function Testing
-**Days 6-8: Function Migration Testing**
+#### 第2週: コア関数テスト
+**6-8日目: 関数移行テスト**
 - ✅ Test tech feed migration
 - ✅ Test hacker news migration
 - ✅ Validate content generation quality
@@ -1664,7 +1664,7 @@ class TestResponseConsistency:
 - ✅ Create quality comparison reports
 - ✅ Establish acceptance criteria
 
-#### Week 3: Advanced Testing and Validation
+#### 第3週: 高度なテストと検証
 **Days 11-12: Performance and Reliability**
 - ✅ Conduct performance benchmarking
 - ✅ Test concurrent request handling
@@ -1677,7 +1677,7 @@ class TestResponseConsistency:
 - ✅ Validate emergency protocols
 - ✅ Document test results
 
-#### Week 4: Production Readiness
+#### 第4週: プロダクション準備
 **Days 16-17: Final Validation**
 - ✅ Production environment testing
 - ✅ Performance validation in staging
@@ -1690,9 +1690,9 @@ class TestResponseConsistency:
 - ✅ Support production deployment
 - ✅ Post-deployment validation
 
-### 6.2 Testing Deliverables
+### 6.2 テスト成果物
 
-#### Documentation Deliverables
+#### ドキュメント成果物
 1. **Test Design Document** (This document)
 2. **Test Results Report** - Summary of all test outcomes
 3. **Performance Benchmark Report** - Gemini vs Claude performance comparison
@@ -1715,11 +1715,11 @@ class TestResponseConsistency:
 
 ---
 
-## 7. Risk-Based Testing Priorities
+## 7. リスクベーステスト優先順位
 
-### 7.1 High-Priority Testing (Must Complete)
+### 7.1 高優先度テスト（必須完了）
 
-#### Critical Path Tests
+#### クリティカルパステスト
 1. **Core Content Generation** - Essential functionality tests
    - Test Effort: 40% of total testing time
    - Coverage: All 4 core functions
@@ -1740,7 +1740,7 @@ class TestResponseConsistency:
    - Coverage: Environment switching, code rollback
    - Success Criteria: <1 hour recovery time
 
-### 7.2 Medium-Priority Testing (Should Complete)
+### 7.2 中優先度テスト（完了推奨）
 
 #### Performance and Reliability Tests
 1. **Response Time Benchmarking** - Performance validation
@@ -1748,7 +1748,7 @@ class TestResponseConsistency:
 3. **Concurrent Request Handling** - Load testing
 4. **Integration Validation** - End-to-end workflows
 
-### 7.3 Low-Priority Testing (Nice to Have)
+### 7.3 低優先度テスト（あれば良い）
 
 #### Advanced and Edge Case Tests
 1. **Complex Error Scenarios** - Advanced failure modes
@@ -1758,11 +1758,11 @@ class TestResponseConsistency:
 
 ---
 
-## 8. Success Criteria and Acceptance Testing
+## 8. 成功基準と受入テスト
 
-### 8.1 Functional Success Criteria
+### 8.1 機能成功基準
 
-#### Core Functionality
+#### コア機能
 - ✅ All 4 core functions work with Claude API
 - ✅ Response formats match existing Gemini output structure
 - ✅ Configuration migration works seamlessly
@@ -1774,7 +1774,7 @@ class TestResponseConsistency:
 - ✅ No degradation in user experience
 - ✅ Maintained or improved response relevance
 
-### 8.2 Performance Success Criteria
+### 8.2 パフォーマンス成功基準
 
 #### Response Time Requirements
 - ✅ Average response time ≤110% of Gemini baseline
@@ -1788,7 +1788,7 @@ class TestResponseConsistency:
 - ✅ System recovers from transient failures
 - ✅ No data loss during migration
 
-### 8.3 Operational Success Criteria
+### 8.3 運用成功基準
 
 #### Rollback Capability
 - ✅ Emergency rollback completes in <1 hour
@@ -1804,11 +1804,11 @@ class TestResponseConsistency:
 
 ---
 
-## 9. Test Execution Instructions
+## 9. テスト実行手順
 
-### 9.1 Local Development Testing
+### 9.1 ローカル開発テスト
 
-#### Environment Setup
+#### 環境セットアップ
 ```bash
 # 1. Install dependencies
 pip install -r requirements.txt
@@ -1861,7 +1861,7 @@ python scripts/test_emergency_rollback.py --dry-run
 python scripts/validate_rollback.py --environment=test
 ```
 
-### 9.2 CI/CD Integration
+### 9.2 CI/CD統合
 
 #### GitHub Actions Workflow
 The testing framework integrates with GitHub Actions for automated testing:
@@ -1896,7 +1896,7 @@ jobs:
         python -m pytest nook/functions/tests/ -v --junit-xml=test-results.xml
 ```
 
-### 9.3 Production Validation
+### 9.3 プロダクション検証
 
 #### Staging Environment Testing
 ```bash
@@ -1927,22 +1927,22 @@ python scripts/validate_monitoring.py
 
 ---
 
-## Conclusion
+## 結論
 
-This test design provides a comprehensive yet practical approach to validating the Gemini-to-Claude migration within the 4-week timeline. The testing strategy prioritizes:
+このテスト設計は、4週間のタイムライン内でGeminiからClaudeへの移行を検証するための包括的かつ実用的なアプローチを提供します。テスト戦略は以下を優先します：
 
-1. **Essential functionality** over comprehensive edge case coverage
-2. **Manual validation** complemented by strategic automation
-3. **Risk-based prioritization** focusing on high-impact scenarios
-4. **Production readiness** with robust rollback capabilities
+1. **包括的なエッジケースカバレッジ**よりも**必須機能**
+2. **戦略的自動化**で補完された**手動検証**
+3. **高影響シナリオ**に焦点を当てた**リスクベース優先順位付け**
+4. **堅牢なロールバック機能**を備えた**プロダクション準備**
 
-The test framework is designed to provide confidence in the migration while being implementable within resource constraints. The modular approach allows for incremental testing as development progresses, with clear success criteria and rollback procedures for risk mitigation.
+テストフレームワークは、リソース制約内で実装可能でありながら、移行への信頼を提供するように設計されています。モジュラーアプローチにより、開発の進行に合わせて段階的テストが可能で、リスク軽減のための明確な成功基準とロールバック手順を備えています。
 
-**Key Benefits of This Approach:**
-- Focuses on core business functionality first
-- Provides clear go/no-go criteria for migration
-- Includes comprehensive rollback testing
-- Balances thoroughness with practical constraints
-- Enables confidence in production deployment
+**このアプローチの主な利点:**
+- コアビジネス機能を最優先
+- 移行のための明確なGo/No-Go基準を提供
+- 包括的ロールバックテストを含む
+- 実装制約と徹底性のバランスを取る
+- プロダクションデプロイメントへの信頼を可能にする
 
-This testing strategy ensures that the migration maintains system reliability while providing the flexibility to iterate and improve post-deployment.
+このテスト戦略により、移行がシステムの信頼性を維持しながら、デプロイ後の反復と改善の柔軟性を提供することが保証されます。

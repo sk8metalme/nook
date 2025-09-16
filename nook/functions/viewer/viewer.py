@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 
 # プロジェクトルートをモジュール検索パスに追加
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..")))
-from nook.functions.common.python.gemini_client import create_client
+from nook.functions.common.python.client_factory import create_client
 
 import requests
 from bs4 import BeautifulSoup

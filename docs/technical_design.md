@@ -1,40 +1,40 @@
-# Nook Gemini-to-Claude Migration Technical Design Document
+# Nook Gemini-to-Claude移行技術設計書
 
-## Table of Contents
+## 目次
 
-1. [Executive Summary](#executive-summary)
-2. [Architecture Design](#architecture-design)
-3. [Implementation Specifications](#implementation-specifications)
-4. [Migration Strategy Details](#migration-strategy-details)
-5. [Technical Specifications](#technical-specifications)
-6. [Integration Points](#integration-points)
-7. [Performance and Security Considerations](#performance-and-security-considerations)
-8. [Testing Strategy](#testing-strategy)
-9. [Rollback and Recovery](#rollback-and-recovery)
-10. [Implementation Timeline](#implementation-timeline)
+1. [エグゼクティブサマリー](#エグゼクティブサマリー)
+2. [アーキテクチャ設計](#アーキテクチャ設計)
+3. [実装仕様](#実装仕様)
+4. [移行戦略詳細](#移行戦略詳細)
+5. [技術仕様](#技術仕様)
+6. [統合ポイント](#統合ポイント)
+7. [パフォーマンスとセキュリティの考慮事項](#パフォーマンスとセキュリティの考慮事項)
+8. [テスト戦略](#テスト戦略)
+9. [ロールバックと復旧](#ロールバックと復旧)
+10. [実装タイムライン](#実装タイムライン)
 
-## Executive Summary
+## エグゼクティブサマリー
 
-This document provides the comprehensive technical design for migrating the Nook application from Google Gemini API to Claude CLI. The migration maintains all existing functionality while introducing a unified AI client abstraction layer for future flexibility.
+この文書では、NookアプリケーションをGoogle Gemini APIからClaude CLIに移行するための包括的な技術設計を提供します。移行では、将来の柔軟性のための統一されたAIクライアント抽象化レイヤーを導入しながら、既存の全機能を維持します。
 
-**Key Objectives:**
-- Replace Gemini API with Claude CLI integration
-- Maintain API compatibility and functionality parity
-- Implement robust error handling and retry mechanisms
-- Ensure zero-downtime deployment with rollback capabilities
-- Optimize for AWS Lambda deployment environment
+**主要目標:**
+- Gemini APIをClaude CLI統合に置き換え
+- API互換性と機能パリティの維持
+- 堅牢なエラーハンドリングとリトライメカニズムの実装
+- ロールバック機能を備えたゼロダウンタイムデプロイメントの確保
+- AWS Lambda デプロイメント環境への最適化
 
-**Architecture Approach:**
-- Abstract interface pattern with factory method
-- Configuration-driven client selection
-- Backward-compatible API surface
-- Phased migration with feature flags
+**アーキテクチャアプローチ:**
+- ファクトリーメソッドを使用した抽象インターフェースパターン
+- 設定駆動のクライアント選択
+- 後方互換性のあるAPIサーフェス
+- フィーチャーフラグによる段階的移行
 
-## Architecture Design
+## アーキテクチャ設計
 
-### 1. Unified AI Client Interface Design
+### 1. 統一AIクライアントインターフェース設計
 
-#### Core Interface Definition
+#### コアインターフェース定義
 
 ```python
 # /nook/functions/common/python/ai_client_interface.py
@@ -128,7 +128,7 @@ class AIClientFactory:
         return client_class(config)
 ```
 
-#### Configuration Management
+#### 設定管理
 
 ```python
 # /nook/functions/common/python/ai_config_manager.py
@@ -197,9 +197,9 @@ class AIConfigManager:
         return {}
 ```
 
-### 2. Claude API SDK Integration Architecture
+### 2. Claude API SDK統合アーキテクチャ
 
-#### Claude Client Implementation
+#### Claude Client実装
 
 ```python
 # /nook/functions/common/python/claude_client.py
@@ -373,7 +373,7 @@ class ClaudeClient(AIClientInterface):
 AIClientFactory.register(AIProvider.CLAUDE, ClaudeClient)
 ```
 
-### 3. Search Service Integration Design
+### 3. 検索サービス統合設計
 
 Since Claude doesn't have built-in search capabilities like Gemini, we need to implement an external search integration:
 
@@ -507,7 +507,7 @@ class EnhancedClaudeClient(ClaudeClient):
 AIClientFactory.register(AIProvider.CLAUDE, EnhancedClaudeClient)
 ```
 
-### 4. Error Handling and Retry Mechanisms
+### 4. エラーハンドリングとリトライメカニズム
 
 ```python
 # /nook/functions/common/python/ai_error_handling.py
@@ -615,9 +615,9 @@ def create_retry_decorator(
     return retry_decorator
 ```
 
-## Implementation Specifications
+## 実装仕様
 
-### 1. Detailed Class Hierarchies and Interfaces
+### 1. 詳細なクラス階層とインターフェース
 
 ```python
 # /nook/functions/common/python/client_factory.py
@@ -674,7 +674,7 @@ def create_client(config: Optional[Dict[str, Any]] = None, **kwargs) -> AIClient
     return UnifiedAIClientFactory.create_client(config=config, **kwargs)
 ```
 
-### 2. Data Flow Diagrams
+### 2. データフロー図
 
 ```
 ┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
@@ -694,7 +694,7 @@ def create_client(config: Optional[Dict[str, Any]] = None, **kwargs) -> AIClient
                                                └─────────────────┘
 ```
 
-### 3. API Integration Patterns
+### 3. API統合パターン
 
 #### Request/Response Flow
 ```python
@@ -730,11 +730,11 @@ class LambdaFunction:
             self.ai_client.close()
 ```
 
-## Migration Strategy Details
+## 移行戦略詳細
 
-### Phase 1: Foundation Setup (Week 1)
+### フェーズ1: 基盤セットアップ（第1週）
 
-#### 1.1 Abstract Interface Implementation
+#### 1.1 抽象インターフェース実装
 ```bash
 # File structure creation
 mkdir -p /nook/functions/common/python/interfaces
@@ -750,7 +750,7 @@ touch /nook/functions/common/python/config/ai_config_manager.py
 touch /nook/functions/common/python/utils/error_handling.py
 ```
 
-#### 1.2 Environment Configuration
+#### 1.2 環境設定
 ```python
 # Environment variables mapping
 ENVIRONMENT_MIGRATION_MAP = {
@@ -778,9 +778,9 @@ ENVIRONMENT_MIGRATION_MAP = {
 }
 ```
 
-### Phase 2: Core Implementation (Week 1-2)
+### フェーズ2: コア実装（第1-2週）
 
-#### 2.1 Claude Client Development
+#### 2.1 Claude Client開発
 ```python
 # Implementation checklist
 CLAUDE_CLIENT_FEATURES = [
@@ -795,7 +795,7 @@ CLAUDE_CLIENT_FEATURES = [
 ]
 ```
 
-#### 2.2 Backward Compatibility Layer
+#### 2.2 後方互換性レイヤー
 ```python
 # /nook/functions/common/python/gemini_client_compatibility.py
 
@@ -820,9 +820,9 @@ def create_client(config=None, **kwargs):
 # from ..common.python.gemini_client import create_client
 ```
 
-### Phase 3: Function Migration (Week 2-3)
+### フェーズ3: 関数移行（第2-3週）
 
-#### 3.1 Migration Order and Strategy
+#### 3.1 移行順序と戦略
 
 ```python
 MIGRATION_PHASES = [
@@ -904,9 +904,9 @@ class FunctionMigrator:
         pass
 ```
 
-### Phase 4: Testing and Validation
+### フェーズ4: テストと検証
 
-#### 4.1 Test Strategy Implementation
+#### 4.1 テスト戦略実装
 
 ```python
 # /nook/functions/common/python/testing/ai_client_test_suite.py
@@ -966,7 +966,7 @@ class AIClientTestSuite(unittest.TestCase):
                     client.generate_content(self.test_content)
 ```
 
-#### 4.2 Integration Testing
+#### 4.2 統合テスト
 
 ```python
 # /nook/functions/common/python/testing/integration_tests.py
@@ -1018,11 +1018,11 @@ class IntegrationTestSuite:
             self.assertIn("response", response)
 ```
 
-## Technical Specifications
+## 技術仕様
 
-### 1. Detailed Code Examples
+### 1. 詳細なコード例
 
-#### Migration Script for Functions
+#### 関数移行スクリプト
 ```python
 #!/usr/bin/env python3
 # /nook/scripts/migrate_function.py
@@ -1120,11 +1120,11 @@ if __name__ == "__main__":
         sys.exit(1)
 ```
 
-### 2. Database/Storage Considerations
+### 2. データベース/ストレージの考慮事項
 
 Since the Nook application doesn't use a traditional database, the main storage considerations are:
 
-#### File System Storage
+#### ファイルシステムストレージ
 ```python
 # /nook/functions/common/python/storage/file_manager.py
 
@@ -1171,9 +1171,9 @@ class FileStorageManager:
         self.save_output("migration_info.json", json.dumps(migration_info, indent=2))
 ```
 
-### 3. Performance Optimization Strategies
+### 3. パフォーマンス最適化戦略
 
-#### Response Caching
+#### レスポンスキャッシュ
 ```python
 # /nook/functions/common/python/caching/response_cache.py
 
@@ -1264,9 +1264,9 @@ class CachedAIClient:
         return response
 ```
 
-### 4. Security Considerations
+### 4. セキュリティの考慮事項
 
-#### API Key Management
+#### APIキー管理
 ```python
 # /nook/functions/common/python/security/key_manager.py
 
@@ -1347,11 +1347,11 @@ def validate_startup_environment():
             raise RuntimeError(f"Required API key missing for {provider}")
 ```
 
-## Integration Points
+## 統合ポイント
 
-### 1. AWS Lambda Deployment Specifications
+### 1. AWS Lambdaデプロイメント仕様
 
-#### Updated Lambda Function Template
+#### 更新されたLambda関数テンプレート
 ```python
 # /nook/functions/common/python/lambda_handler.py
 
@@ -1449,7 +1449,7 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     return handler.handle_request(event, context)
 ```
 
-#### Dependencies and Requirements
+#### 依存関係と要件
 ```txt
 # requirements.txt for Claude-based functions
 
@@ -1477,9 +1477,9 @@ black>=23.0.0
 flake8>=6.0.0
 ```
 
-### 2. Local Development Setup
+### 2. ローカル開発環境セットアップ
 
-#### Development Configuration
+#### 開発設定
 ```python
 # /nook/scripts/setup_dev_environment.py
 
@@ -1546,7 +1546,7 @@ if __name__ == "__main__":
     setup_development_environment()
 ```
 
-#### Development Testing Script
+#### 開発テストスクリプト
 ```python
 # /nook/scripts/test_migration.py
 
@@ -1594,9 +1594,9 @@ if __name__ == "__main__":
     test_ai_client()
 ```
 
-### 3. CI/CD Pipeline Modifications
+### 3. CI/CDパイプライン変更
 
-#### GitHub Actions Workflow
+#### GitHub Actionsワークフロー
 ```yaml
 # .github/workflows/migrate-and-test.yml
 
@@ -1697,9 +1697,9 @@ jobs:
         ./scripts/deploy-staging.sh
 ```
 
-### 4. Monitoring and Observability
+### 4. 監視と可観測性
 
-#### Performance Monitoring
+#### パフォーマンス監視
 ```python
 # /nook/functions/common/python/monitoring/performance_monitor.py
 
@@ -1828,11 +1828,11 @@ class PerformanceMonitor:
         }
 ```
 
-## Performance and Security Considerations
+## パフォーマンスとセキュリティの考慮事項
 
-### 1. Performance Optimization
+### 1. パフォーマンス最適化
 
-#### Connection Pooling and Reuse
+#### コネクションプーリングと再利用
 ```python
 # /nook/functions/common/python/optimization/connection_manager.py
 
@@ -1878,9 +1878,9 @@ class ConnectionManager:
         return self._clients[config_hash]
 ```
 
-### 2. Security Best Practices
+### 2. セキュリティベストプラクティス
 
-#### Request Validation and Sanitization
+#### リクエスト検証とサニタイゼーション
 ```python
 # /nook/functions/common/python/security/request_validator.py
 
@@ -1958,9 +1958,9 @@ class RequestValidator:
         return cls.validate_content(instruction)
 ```
 
-## Testing Strategy
+## テスト戦略
 
-### 1. Unit Testing Framework
+### 1. ユニットテストフレームワーク
 
 ```python
 # /nook/functions/common/python/tests/test_client_factory.py
@@ -2046,7 +2046,7 @@ if __name__ == '__main__':
     unittest.main()
 ```
 
-### 2. Integration Testing
+### 2. 統合テスト
 
 ```python
 # /nook/functions/common/python/tests/test_integration.py
@@ -2127,9 +2127,9 @@ if __name__ == '__main__':
     unittest.main()
 ```
 
-## Rollback and Recovery
+## ロールバックと復旧
 
-### 1. Automated Rollback System
+### 1. 自動ロールバックシステム
 
 ```python
 # /nook/scripts/rollback_migration.py
@@ -2351,18 +2351,18 @@ if __name__ == "__main__":
     main()
 ```
 
-## Implementation Timeline
+## 実装タイムライン
 
-### Detailed Week-by-Week Schedule
+### 詳細な週次スケジュール
 
-#### Week 1: Foundation and Core Development
-**Days 1-2: Architecture Setup**
+#### 第1週: 基盤とコア開発
+**1-2日目: アーキテクチャセットアップ**
 - ✅ Create abstract interface (`ai_client_interface.py`)
 - ✅ Implement configuration manager (`ai_config_manager.py`)
 - ✅ Setup factory pattern (`client_factory.py`)
 - ✅ Create error handling framework (`ai_error_handling.py`)
 
-**Days 3-5: Claude Client Implementation**
+**3-5日目: Claude Client実装**
 - ✅ Implement basic Claude client (`claude_client.py`)
 - ✅ Add retry logic and error handling
 - ✅ Implement chat functionality
@@ -2414,4 +2414,4 @@ if __name__ == "__main__":
 - **Weekly**: Stakeholder updates and risk assessment
 - **Per Phase**: Go/no-go decision points with rollback options
 
-This technical design document provides a comprehensive roadmap for migrating from Gemini to Claude while maintaining system reliability, performance, and functionality. The modular approach allows for phased implementation with robust testing and rollback capabilities at each stage.
+この技術設計書は、システムの信頼性、パフォーマンス、機能性を維持しながらGeminiからClaudeに移行するための包括的なロードマップを提供します。モジュラーアプローチにより、各段階で堅牢なテストとロールバック機能を備えた段階的実装が可能になります。

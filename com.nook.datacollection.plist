@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.nook.datacollection</string>
+    
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>-c</string>
+        <string>cd /Users/arigatatsuya/Work/git/nook && export AI_CLIENT_TYPE=claude && export OUTPUT_DIR="/Users/arigatatsuya/Library/Mobile Documents/iCloud~md~obsidian/Documents/obsidian-iphone/nook" && export PATH="/opt/homebrew/bin:/Users/arigatatsuya/.pyenv/versions/3.12.4/bin:/usr/local/bin:/usr/bin:/bin" && /Users/arigatatsuya/.pyenv/versions/3.12.4/bin/python main.py</string>
+    </array>
+    
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key>
+        <integer>0</integer>
+        <key>Minute</key>
+        <integer>0</integer>
+    </dict>
+    
+    <key>StandardOutPath</key>
+    <string>/Users/arigatatsuya/Work/git/nook/logs/datacollection.log</string>
+    
+    <key>StandardErrorPath</key>
+    <string>/Users/arigatatsuya/Work/git/nook/logs/datacollection_error.log</string>
+    
+    <key>WorkingDirectory</key>
+    <string>/Users/arigatatsuya/Work/git/nook</string>
+    
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>AI_CLIENT_TYPE</key>
+        <string>claude</string>
+        <key>OUTPUT_DIR</key>
+        <string>/Users/arigatatsuya/Library/Mobile Documents/iCloud~md~obsidian/Documents/obsidian-iphone/nook</string>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/Users/arigatatsuya/.pyenv/versions/3.12.4/bin:/usr/local/bin:/usr/bin:/bin</string>
+    </dict>
+    
+    <key>RunAtLoad</key>
+    <false/>
+    
+    <key>KeepAlive</key>
+    <false/>
+</dict>
+</plist>

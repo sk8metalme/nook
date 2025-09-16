@@ -1,196 +1,196 @@
-# Testing Guide for Claude Integration
+# Claude統合テストガイド
 
-## Overview
+## 概要
 
-This guide covers the comprehensive test suite implemented for the Claude integration in the Nook project. The testing approach follows Test-Driven Development (TDD) principles and ensures reliable migration from Gemini to Claude APIs.
+このガイドでは、NookプロジェクトにおけるClaude統合のために実装された包括的テストスイートについて説明します。テストアプローチはテスト駆動開発（TDD）の原則に従い、GeminiからClaude APIへの信頼性の高い移行を保証します。
 
-## Test Structure
+## テスト構造
 
-### Test Files Location
+### テストファイルの場所
 ```
 nook/
 ├── functions/common/python/tests/
-│   ├── test_claude_client.py          # Claude client unit tests
-│   ├── test_client_factory.py         # Factory pattern tests
+│   ├── test_claude_client.py          # Claude clientユニットテスト
+│   ├── test_client_factory.py         # Factory patternテスト
 │   └── fixtures/
-│       └── mock_responses.json        # Mock API response data
+│       └── mock_responses.json        # モックAPIレスポンスデータ
 └── tests/integration/
-    └── test_claude_basic_integration.py # Integration tests
+    └── test_claude_basic_integration.py # 統合テスト
 ```
 
-## Dependencies and Setup
+## 依存関係とセットアップ
 
-### Test Dependencies
+### テスト依存関係
 
-#### Core Testing Framework
+#### コアテストフレームワーク
 ```
-pytest>=7.4.0                # Main testing framework
-pytest-mock>=3.11.0          # Mocking capabilities
-pytest-asyncio>=0.21.0       # Async testing support
-pytest-cov>=4.1.0            # Code coverage reporting
-pytest-env>=0.8.0            # Environment management
-pytest-html>=3.2.0           # HTML test reports
-```
-
-#### Mocking and HTTP Testing
-```
-responses>=0.23.0             # HTTP request mocking
-httpretty>=1.1.0             # HTTP interaction mocking
+pytest>=7.4.0                # メインテストフレームワーク
+pytest-mock>=3.11.0          # モック機能
+pytest-asyncio>=0.21.0       # 非同期テストサポート
+pytest-cov>=4.1.0            # コードカバレッジレポート
+pytest-env>=0.8.0            # 環境管理
+pytest-html>=3.2.0           # HTMLテストレポート
 ```
 
-#### Performance and Data Generation
+#### モックとHTTPテスト
 ```
-pytest-benchmark>=4.0.0      # Performance testing
-factory-boy>=3.3.0           # Test data factories
-faker>=19.0.0                # Fake data generation
+responses>=0.23.0             # HTTPリクエストモック
+httpretty>=1.1.0             # HTTPインタラクションモック
 ```
 
-#### API Dependencies
+#### パフォーマンスとデータ生成
+```
+pytest-benchmark>=4.0.0      # パフォーマンステスト
+factory-boy>=3.3.0           # テストデータファクトリ
+faker>=19.0.0                # 偽データ生成
+```
+
+#### API依存関係
 ```
 anthropic>=0.25.0            # Claude API SDK
-python-dotenv>=1.0.0         # Environment variable management
-tenacity>=8.2.0              # Retry mechanism testing
-google-genai>=0.5.0          # Gemini API (for compatibility tests)
+python-dotenv>=1.0.0         # 環境変数管理
+tenacity>=8.2.0              # リトライメカニズムテスト
+google-genai>=0.5.0          # Gemini API（互換性テスト用）
 ```
 
-### Installation
+### インストール
 ```bash
 pip install -r requirements-test.txt
 ```
 
-## Test Coverage
+## テストカバレッジ
 
-### Unit Tests
+### ユニットテスト
 
-#### Claude Client Tests (`test_claude_client.py`)
+#### Claude Clientテスト（`test_claude_client.py`）
 
-**Configuration Tests**:
-- ✅ Default configuration values
-- ✅ Configuration updates with valid keys
-- ✅ Error handling for invalid configuration keys
+**設定テスト**:
+- ✅ デフォルト設定値
+- ✅ 有効なキーでの設定更新
+- ✅ 無効な設定キーのエラーハンドリング
 
-**Client Initialization Tests**:
-- ✅ Successful initialization with API key
-- ✅ Failure with missing API key
-- ✅ Configuration overrides during initialization
+**クライアント初期化テスト**:
+- ✅ APIキーでの正常初期化
+- ✅ APIキー不足での失敗
+- ✅ 初期化時の設定オーバーライド
 
-**Content Generation Tests**:
-- ✅ String input processing
-- ✅ List input processing (multi-content)
-- ✅ System instruction support
-- ✅ Parameter overrides (temperature, max_tokens, etc.)
-- ✅ API error handling and logging
+**コンテンツ生成テスト**:
+- ✅ 文字列入力処理
+- ✅ リスト入力処理（マルチコンテンツ）
+- ✅ システム指示サポート
+- ✅ パラメータオーバーライド（temperature、max_tokensなど）
+- ✅ APIエラーハンドリングとログ記録
 
-**Chat Session Tests**:
-- ✅ Chat session creation
-- ✅ Chat with custom parameters
-- ✅ Message sending and context preservation
-- ✅ System instruction in chat
-- ✅ Error handling without chat session
+**チャットセッションテスト**:
+- ✅ チャットセッション作成
+- ✅ カスタムパラメータでのチャット
+- ✅ メッセージ送信とコンテキスト保持
+- ✅ チャットでのシステム指示
+- ✅ チャットセッションなしでのエラーハンドリング
 
-**Factory Function Tests**:
-- ✅ Client creation without config
-- ✅ Client creation with explicit config
-- ✅ Client creation with keyword arguments
+**Factory関数テスト**:
+- ✅ 設定なしでのクライアント作成
+- ✅ 明示的設定でのクライアント作成
+- ✅ キーワード引数でのクライアント作成
 
-#### Factory Pattern Tests (`test_client_factory.py`)
+#### Factory Patternテスト（`test_client_factory.py`）
 
-**Provider Selection Tests**:
-- ✅ Default Gemini client creation
-- ✅ Explicit Gemini client creation
-- ✅ Claude client creation with environment variable
-- ✅ Error handling for invalid client types
-- ✅ Case-insensitive client type handling
+**プロバイダー選択テスト**:
+- ✅ デフォルトGeminiクライアント作成
+- ✅ 明示的Geminiクライアント作成
+- ✅ 環境変数でのClaudeクライアント作成
+- ✅ 無効なクライアントタイプのエラーハンドリング
+- ✅ 大文字小文字を区別しないクライアントタイプ処理
 
-**Configuration Passing Tests**:
-- ✅ Configuration passed to Gemini client
-- ✅ Configuration passed to Claude client
-- ✅ Keyword arguments passed to both clients
+**設定渡しテスト**:
+- ✅ Geminiクライアントへの設定渡し
+- ✅ Claudeクライアントへの設定渡し
+- ✅ 両クライアントへのキーワード引数渡し
 
-**Integration Scenarios**:
-- ✅ Environment-based switching
-- ✅ Interface compatibility verification
+**統合シナリオ**:
+- ✅ 環境ベース切替
+- ✅ インターフェース互換性検証
 
-### Integration Tests (`test_claude_basic_integration.py`)
+### 統合テスト（`test_claude_basic_integration.py`）
 
-**Basic Integration**:
-- ✅ Content generation with mocked responses
-- ✅ Paper summarization format validation
-- ✅ Tech news analysis format validation
-- ✅ Chat session multi-turn conversations
-- ✅ Error handling in integration scenarios
-- ✅ Configuration integration testing
+**基本統合**:
+- ✅ モックレスポンスでのコンテンツ生成
+- ✅ 論文要約フォーマット検証
+- ✅ 技術ニュース分析フォーマット検証
+- ✅ チャットセッションマルチターン会話
+- ✅ 統合シナリオでのエラーハンドリング
+- ✅ 設定統合テスト
 
-**Functional Parity**:
-- ✅ Response structure validation
-- ✅ Response quality consistency
-- ✅ Length and format verification
+**機能パリティ**:
+- ✅ レスポンス構造検証
+- ✅ レスポンス品質一貫性
+- ✅ 長さとフォーマット検証
 
-## Running Tests
+## テスト実行
 
-### Basic Test Execution
+### 基本テスト実行
 ```bash
-# Run all tests
+# 全テスト実行
 pytest
 
-# Run with verbose output
+# 詳細出力で実行
 pytest -v
 
-# Run specific test file
+# 特定のテストファイル実行
 pytest nook/functions/common/python/tests/test_claude_client.py
 
-# Run specific test class
+# 特定のテストクラス実行
 pytest nook/functions/common/python/tests/test_claude_client.py::TestClaudeClient
 
-# Run specific test method
+# 特定のテストメソッド実行
 pytest nook/functions/common/python/tests/test_claude_client.py::TestClaudeClient::test_generate_content_success
 ```
 
-### Coverage Reporting
+### カバレッジレポート
 ```bash
-# Run tests with coverage
+# カバレッジ付きでテスト実行
 pytest --cov=nook/functions/common/python/
 
-# Generate HTML coverage report
+# HTMLカバレッジレポート生成
 pytest --cov=nook/functions/common/python/ --cov-report=html
 
-# View coverage report
+# カバレッジレポート表示
 open htmlcov/index.html
 ```
 
-### Integration Test Execution
+### 統合テスト実行
 ```bash
-# Run only integration tests
+# 統合テストのみ実行
 pytest tests/integration/ -m integration
 
-# Run integration tests with verbose output
+# 詳細出力で統合テスト実行
 pytest tests/integration/ -m integration -v
 ```
 
-## Test Coverage Metrics
+## テストカバレッジメトリクス
 
-### Current Coverage Status
+### 現在のカバレッジ状況
 
-#### Claude Client Module
-- **Overall Coverage**: >90%
-- **Lines Covered**: 95%+
-- **Branches Covered**: 90%+
-- **Functions Covered**: 100%
+#### Claude Clientモジュール
+- **全体カバレッジ**: 90%以上
+- **行カバレッジ**: 95%以上
+- **分岐カバレッジ**: 90%以上
+- **関数カバレッジ**: 100%
 
-#### Client Factory Module
-- **Overall Coverage**: >95%
-- **Lines Covered**: 98%+
-- **Branches Covered**: 95%+
-- **Functions Covered**: 100%
+#### Client Factoryモジュール
+- **全体カバレッジ**: 95%以上
+- **行カバレッジ**: 98%以上
+- **分岐カバレッジ**: 95%以上
+- **関数カバレッジ**: 100%
 
-#### Integration Tests
-- **Core Functionality**: 100% tested
-- **Error Scenarios**: 90% covered
-- **Configuration Scenarios**: 100% tested
+#### 統合テスト
+- **コア機能**: 100%テスト済み
+- **エラーシナリオ**: 90%カバー済み
+- **設定シナリオ**: 100%テスト済み
 
-## Mock Data and Fixtures
+## モックデータとフィクスチャ
 
-### Mock API Responses (`fixtures/mock_responses.json`)
+### モックAPIレスポンス（`fixtures/mock_responses.json`）
 ```json
 {
   "simple_response": "This is a simple response from Claude.",
@@ -358,15 +358,15 @@ pytest --tb=long
 pytest --lf
 ```
 
-## Conclusion
+## 結論
 
-The test suite provides comprehensive coverage for the Claude integration, ensuring reliability and maintainability. The combination of unit tests, integration tests, and performance benchmarks gives confidence in the migration process and ongoing system stability.
+テストスイートは、Claude統合の包括的カバレッジを提供し、信頼性と保守性を確保しています。ユニットテスト、統合テスト、パフォーマンスベンチマークの組み合わせにより、移行プロセスと継続的なシステム安定性に対する信頼を提供します。
 
-**Key Strengths**:
-- >90% code coverage for core components
-- Comprehensive error scenario testing
-- Provider switching validation
-- Performance regression prevention
-- Maintainable test structure with fixtures and mocks
+**主な強み**:
+- コアコンポーネントで90%以上のコードカバレッジ
+- 包括的エラーシナリオテスト
+- プロバイダー切替検証
+- パフォーマンス回帰防止
+- フィクスチャとモックによる保守可能なテスト構造
 
-This testing framework supports the successful migration from Gemini to Claude while maintaining system reliability and enabling future enhancements.
+このテストフレームワークは、システムの信頼性を維持し、将来の機能強化を可能にしながら、GeminiからClaudeへの成功的な移行をサポートします。

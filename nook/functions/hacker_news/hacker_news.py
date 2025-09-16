@@ -1,12 +1,14 @@
 import inspect
 import os
+import traceback
 from dataclasses import dataclass
 from datetime import date
+from pprint import pprint
 from typing import Any
 
 import requests
 from bs4 import BeautifulSoup
-from ..common.python.gemini_client import create_client
+from ..common.python.client_factory import create_client
 
 _MARKDOWN_FORMAT = """
 # {title}
@@ -14,6 +16,10 @@ _MARKDOWN_FORMAT = """
 **Score**: {score}
 
 {url_or_text}
+
+**日本語タイトル**: {japanese_title}
+
+**記事要約**: {article_summary}
 """
 
 class Config:
@@ -97,11 +103,112 @@ class HackerNewsRetriever:
 
     def _stylize_story(self, story: Story) -> str:
         url_or_text = f"[View Link]({story.url})" if story.url else story.text
+        # タイトルを日本語に翻訳
+        japanese_title = self._translate_title_to_japanese(story.title)
+        
+        # 記事の要約を生成
+        article_summary = self._get_article_summary(story)
+        
         return _MARKDOWN_FORMAT.format(
             title=story.title,
             score=story.score,
             url_or_text=url_or_text,
+            japanese_title=japanese_title,
+            article_summary=article_summary,
         )
+    
+    def _translate_title_to_japanese(self, title: str) -> str:
+        """英語のタイトルを日本語に翻訳する"""
+        try:
+            prompt = f"""以下の英語のニュースタイトルを自然な日本語に翻訳してください。技術用語や固有名詞は適切に翻訳し、ニュースタイトルとして自然な日本語にしてください。
+
+英語タイトル: {title}
+
+日本語タイトル:"""
+            
+            response = self._client.generate_content(prompt)
+            return response.strip()
+        except Exception as e:
+            print(f"タイトル翻訳エラー: {e}")
+            return title  # 翻訳に失敗した場合は元のタイトルを返す
+    
+    def _get_article_summary(self, story: Story) -> str:
+        """記事の内容を取得し、日本語で要約する"""
+        try:
+            if not story.url:
+                # URLがない場合はHacker Newsの投稿テキストを要約
+                if story.text and len(story.text) > 50:
+                    return self._summarize_text_content(story.text, story.title)
+                else:
+                    return "要約できる内容がありません"
+            
+            # URLがある場合は記事を取得して要約
+            return self._fetch_and_summarize_article(story.url, story.title)
+            
+        except Exception as e:
+            print(f"記事要約エラー: {e}")
+            return "記事要約を生成できませんでした"
+    
+    def _fetch_and_summarize_article(self, url: str, title: str) -> str:
+        """URLから記事を取得し、日本語で要約する"""
+        try:
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            }
+            response = requests.get(url, headers=headers, timeout=10)
+            if response.status_code != 200:
+                return "記事を取得できませんでした"
+            
+            soup = BeautifulSoup(response.text, 'html.parser')
+            
+            # 記事本文を抽出（一般的なタグを試行）
+            content = ""
+            for selector in ['article', 'main', '.content', '.post-content', '.entry-content', 'p']:
+                elements = soup.select(selector)
+                if elements:
+                    content = ' '.join([elem.get_text().strip() for elem in elements])
+                    break
+            
+            if not content:
+                # フォールバック: すべてのpタグを取得
+                paragraphs = soup.find_all('p')
+                content = ' '.join([p.get_text().strip() for p in paragraphs])
+            
+            if len(content) < 100:
+                return "記事内容を十分に取得できませんでした"
+            
+            # 長すぎる場合は制限
+            if len(content) > 3000:
+                content = content[:3000] + "..."
+            
+            return self._summarize_text_content(content, title)
+            
+        except Exception as e:
+            print(f"記事取得エラー ({url}): {e}")
+            return "記事の取得に失敗しました"
+    
+    def _summarize_text_content(self, content: str, title: str) -> str:
+        """テキスト内容を日本語で要約する"""
+        try:
+            prompt = f"""以下のニュース記事を日本語で簡潔に要約してください。
+- 記事の主要なポイント
+- 重要な事実や数字
+- 影響や意義
+を含めて、3-4文程度で要約してください。
+
+タイトル: {title}
+
+記事内容:
+{content}
+
+日本語要約:"""
+            
+            response = self._client.generate_content(prompt)
+            return response.strip()
+            
+        except Exception as e:
+            print(f"テキスト要約エラー: {e}")
+            return "要約の生成に失敗しました"
 
     @property
     def _system_instruction(self) -> str:

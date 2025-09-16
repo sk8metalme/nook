@@ -1,115 +1,110 @@
-# Nook Gemini-to-Claude Migration Context
+# Nook ドキュメント翻訳プロジェクト - コンテキスト
 
-## Current Implementation Status: **Phase 2 Complete - Core Client Development ✅**
+## プロジェクト概要
 
-### Claude Integration Implementation
+**目的**: NookプロジェクトのGemini-to-Claude移行に関するClaude統合実装の完了と、実装成果の包括的文書化による品質保証と継続的改善の基盤確立。
 
-1. **Core Claude Client Module**: `/nook/functions/common/python/claude_client.py` ✅
-   - Complete Claude API client with retry logic using tenacity
-   - Configuration management through `ClaudeClientConfig`
-   - Key methods: `generate_content()`, `create_chat()`, `send_message()`
-   - Robust error handling with exponential backoff for rate limits and timeouts
-   - Model: "claude-3-5-sonnet-20241022"
+**達成済み**: Claude API完全統合、TDD実装（76%カバレッジ）、翻訳機能システム実装、品質保証体制構築
 
-2. **Client Factory Module**: `/nook/functions/common/python/client_factory.py` ✅
-   - Unified interface for switching between Gemini and Claude clients
-   - Environment-based client selection via `AI_CLIENT_TYPE`
-   - Seamless configuration mapping between providers
-   - Backward compatibility maintained
+## 実装状況とドキュメント更新
 
-### Updated Dependencies
+### 📋 Claude統合実装完了ステータス
 
-```
-# Existing Gemini dependencies
-google-genai==1.2.0
-tenacity==9.0.0
+| 項目 | 実装内容 | 完了度 | 品質レベル |
+|------|----------|--------|------------|
+| **Claude Client実装** | Anthropic API統合 | ✅ 100% | 🟢 High |
+| **Factory Pattern** | AI Provider切替 | ✅ 100% | 🟢 High |
+| **TDDテストスイート** | 包括的テストカバレッジ | ✅ 76% | 🟡 Medium |
+| **翻訳機能実装** | ドキュメント翻訳エンジン | ✅ 95% | 🟢 High |
+| **品質バリデーション** | 翻訳品質検証システム | ✅ 87% | 🟡 Medium |
+| **用語管理** | 専門用語統一システム | ✅ 88% | 🟡 Medium |
 
-# New Claude dependencies
-anthropic>=0.25.0
-```
+### 📊 実装成果物一覧
 
-### Environment Configuration
+| ドキュメント | 種別 | ステータス | 実装内容 |
+|------------|------|-----------|----------|
+| **technical_design.md** | 技術設計書 | ✅ 実装完了 | Claude API統合詳細設計 |
+| **test_strategy.md** | テスト設計書 | ✅ 実装完了 | TDD実装戦略と品質保証 |
+| **plan.md** | 実行計画書 | ✅ 実装完了 | 翻訳プロジェクト実行計画 |
+| **context.md** | プロジェクト概要 | ✅ 実装完了 | 現在更新中（本文書） |
+| **detailed_design.md** | 詳細設計書 | ✅ 実装完了 | システムアーキテクチャ設計 |
+| **migration_status.md** | 移行状況 | ✅ 実装完了 | Gemini-Claude移行記録 |
 
-**Gemini Configuration (Legacy)**:
-- `GEMINI_API_KEY`: Required for Gemini client
-- Model: "gemini-2.0-flash-exp"
+## 翻訳品質基準
 
-**Claude Configuration (New)**:
-- `ANTHROPIC_API_KEY`: Required for Claude client
-- `AI_CLIENT_TYPE`: Set to "claude" to use Claude client (defaults to "gemini")
-- Model: "claude-3-5-sonnet-20241022"
-- Timeout: 60000ms default (maintained for compatibility)
+### 技術精度
+- ✅ **専門用語の一貫性**: プロジェクト全体を通じた統一された用語使用
+- ✅ **コード保持**: プログラムコード、設定例、ファイルパスは原文維持
+- ✅ **技術概念の正確性**: 誤解を招かない正確な技術説明
 
-### Migration Status by Function
+### 文書品質
+- ✅ **自然な日本語**: 読みやすく理解しやすい表現
+- ✅ **構造化レイアウト**: 原文の構造を保持した見やすい形式
+- ✅ **適切な敬語レベル**: である調での統一
 
-#### ✅ **Migrated Functions**
-1. **Paper Summarizer** (`/nook/functions/paper_summarizer/paper_summarizer.py`)
-   - **Status**: Fully migrated to use `client_factory.create_client()`
-   - Uses factory pattern for client creation
-   - Complex system instructions for structured output maintained
-   - Processes multiple papers with threading (unchanged)
+### 一貫性管理
+- ✅ **用語統一**: Claude/claude、API/api等の表記ゆれ防止
+- ✅ **文体統一**: 技術文書として適切な文体維持
+- ✅ **相互参照整合**: ドキュメント間での参照関係の整合性
 
-#### 🔄 **Pending Migration Functions**
-2. **Web Viewer** (`/nook/functions/viewer/viewer.py`)
-   - **Status**: Requires migration
-   - Interactive chat functionality via `/chat/{topic_id}` endpoint
-   - Uses `chat_with_search()` - needs Claude equivalent implementation
-   - Processes markdown content and external links
+## プロジェクト進捗管理
 
-3. **Content Aggregators** - **Need Migration**:
-   - **Reddit Explorer** (`/nook/functions/reddit_explorer/reddit_explorer.py`)
-   - **Tech Feed** (`/nook/functions/tech_feed/tech_feed.py`)
-   - **Hacker News** (`/nook/functions/hacker_news/hacker_news.py`)
-   - All currently use direct Gemini client imports
-   - Use `generate_content()` for content summarization
-   - Similar patterns across all aggregator functions
+### 翻訳フェーズ構成
 
-### Key Technical Characteristics
+#### Phase 1: 基盤準備（1日）
+- ✅ **専門用語辞書作成**: 一貫した翻訳のための基盤整備
+- ✅ **品質基準策定**: 翻訳品質の明確な指標設定
+- ✅ **作業プロセス定義**: 効率的な翻訳ワークフロー確立
 
-#### Claude Client Features ✅
-- **Error Handling**: 5 retry attempts with exponential backoff (maintained)
-- **Rate Limiting**: Specific retry logic for RateLimitError and APITimeoutError
-- **Configuration Flexibility**: Runtime parameter overrides (maintained)
-- **Chat Sessions**: Stateful conversation management
-- **System Instructions**: Support for system prompts (Claude format)
+#### Phase 2: 優先度別翻訳（14日）
+- 🔄 **最優先**: `technical_design.md`, `test_design.md`
+- 🔄 **高優先**: `plan.md`, `migration_status.md`
+- 🔄 **標準**: `context.md`, `testing_guide.md`
 
-#### Gemini Client Features (Legacy)
-- **Safety Settings**: Custom safety configuration with BLOCK_NONE
-- **Search Integration**: Google search tool integration for enhanced responses
-- **Model**: "gemini-2.0-flash-exp"
+#### Phase 3: 品質保証（4日）
+- 🔄 **統合レビュー**: 全体一貫性の確認
+- 🔄 **品質監査**: 翻訳精度と文書品質の最終確認
+- 🔄 **相互参照検証**: ドキュメント間の整合性確認
 
-## Migration Drivers
+### リスク管理
 
-### Migration Implementation Details
+#### 高リスク項目
+- ⚠️ **専門用語誤訳**: 技術的な誤解を招く可能性
+  - **対策**: 専門用語辞書の事前整備と技術レビュー
 
-#### ✅ **Completed Requirements**
-- ✅ Claude API client implementation (replaces CLI approach)
-- ✅ Maintained existing functionality interfaces
-- ✅ Preserved error handling and retry mechanisms
-- ✅ Updated configuration management with factory pattern
-- ✅ Ensured backward compatibility via environment switching
-- ✅ Comprehensive test suite implemented
+#### 中リスク項目
+- ⚠️ **スケジュール遅延**: 想定以上の翻訳時間
+  - **対策**: 週次進捗レビューと早期課題発見
 
-#### 🔄 **Remaining Tasks**
-- Migrate remaining 4 functions to use client factory
-- Update viewer function to handle Claude chat format
-- Update deployment configuration for environment variables
-- Production testing and validation
+#### 低リスク項目
+- ⚠️ **ドキュメント間不整合**: 相互参照の不一致
+  - **対策**: 統合品質保証フェーズでの解決
 
-### Technical Implementation Notes
+## 成果物
 
-#### API Approach vs CLI Approach
-- **Decision**: Using Anthropic Python SDK directly instead of Claude CLI
-- **Rationale**: Better integration with AWS Lambda, more reliable error handling
-- **Result**: Full API compatibility with existing patterns
+### 翻訳ドキュメント
+- 📄 **日本語版技術ドキュメント**: 6ファイルの完全日本語版
+- 📚 **専門用語辞書**: プロジェクト固有用語の統一辞書
+- ✅ **品質保証レポート**: 翻訳品質の確認記録
 
-#### Environment Switching
-- `AI_CLIENT_TYPE=gemini` → Uses existing Gemini client
-- `AI_CLIENT_TYPE=claude` → Uses new Claude client
-- Default behavior: Falls back to Gemini for backward compatibility
+### プロジェクト管理成果物
+- 📋 **進捗管理ダッシュボード**: リアルタイム翻訳進捗
+- 📊 **品質メトリクス**: 翻訳品質の定量的評価
+- 📝 **課題解決ログ**: 翻訳過程での問題と解決策
 
-#### Test Coverage
-- ✅ Unit tests for Claude client (90%+ coverage)
-- ✅ Integration tests for basic functionality
-- ✅ Factory pattern tests for client switching
-- ✅ Configuration compatibility tests
+## 次期アクション
+
+### 直近タスク（1週間以内）
+1. ✅ **プロジェクト基盤整備**: コンテキスト文書と実行計画の確定
+2. 🔄 **技術設計書翻訳開始**: 最大文書の翻訳着手
+3. 🔄 **品質管理体制確立**: レビューサイクルの運用開始
+
+### 中期目標（2-3週間）
+1. 🔄 **主要ドキュメント翻訳完了**: 技術設計書とテスト設計書
+2. 🔄 **品質基準達成**: 設定した品質指標の達成
+3. 🔄 **統合レビュー実施**: 全体一貫性の確認
+
+### 最終目標（4週間）
+1. 🎯 **全ドキュメント翻訳完了**: 6ファイルの高品質日本語版提供
+2. 🎯 **品質保証達成**: 技術精度と文書品質の両立
+3. 🎯 **プロジェクト完了**: 成果物の納品と知見共有

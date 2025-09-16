@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Nook is a local/self-hosted fork of a news aggregation system that automatically collects and summarizes tech content from multiple sources (Reddit, Hacker News, GitHub Trending, arXiv papers, RSS feeds). This fork removes AWS dependencies to run locally or on home servers.
 
-**✅ Claude Integration Status**: This project now supports both Google Gemini and Claude APIs for content generation, with seamless switching between providers via environment variables.
+**✅ Claude Integration Status**: This project now supports both Google Gemini and Claude CLI for content generation, with seamless switching between providers via environment variables.
 
 ## Development Commands
 
@@ -20,7 +20,7 @@ pip install -r requirements-dev.txt
 
 # Configure AI provider (choose one)
 export AI_CLIENT_TYPE=gemini    # Use Google Gemini (default)
-export AI_CLIENT_TYPE=claude    # Use Claude API
+export AI_CLIENT_TYPE=claude    # Use Claude CLI
 
 # Run data collection
 python main.py
@@ -102,21 +102,22 @@ python -m pytest     # Run tests (limited test coverage)
 - Copy `.env.example` to `.env` and configure API keys
 - **AI Provider Configuration** (choose one):
   - **Gemini**: Set `GEMINI_API_KEY` (default)
-  - **Claude**: Set `ANTHROPIC_API_KEY` and `AI_CLIENT_TYPE=claude`
+  - **Claude CLI**: Install Claude CLI (`npm install -g @anthropic-ai/claude-cli`) and set `AI_CLIENT_TYPE=claude`
 - Reddit API credentials needed for Reddit content collection
 - OUTPUT_DIR specifies where to save collected content locally
 
 ### Claude Integration Details
 
-#### Switching to Claude
+#### Switching to Claude CLI
 ```bash
-# In your .env file
-ANTHROPIC_API_KEY=your_claude_api_key
-AI_CLIENT_TYPE=claude
+# Install Claude CLI
+npm install -g @anthropic-ai/claude-cli
 
-# Or set environment variables
-export ANTHROPIC_API_KEY=your_claude_api_key
+# Set environment variable
 export AI_CLIENT_TYPE=claude
+
+# Or in your .env file
+AI_CLIENT_TYPE=claude
 ```
 
 #### Client Factory Pattern
@@ -128,20 +129,20 @@ from nook.functions.common.python.client_factory import create_client
 # Automatically uses the configured provider
 client = create_client()
 
-# Both Gemini and Claude clients support the same interface:
+# Both Gemini and Claude CLI clients support the same interface:
 response = client.generate_content("Summarize this content")
 ```
 
 #### Migration Status
-- ✅ **Paper Summarizer**: Migrated to use factory pattern
-- 🔄 **Tech Feed**: Pending migration
-- 🔄 **Hacker News**: Pending migration
-- 🔄 **Reddit Explorer**: Pending migration
-- 🔄 **Web Viewer**: Pending migration
+- ✅ **Paper Summarizer**: Migrated to use Claude CLI factory pattern
+- ✅ **Tech Feed**: Migrated to use Claude CLI factory pattern
+- ✅ **Hacker News**: Migrated to use Claude CLI factory pattern
+- ✅ **Reddit Explorer**: Migrated to use Claude CLI factory pattern
+- ✅ **Web Viewer**: Migrated to use Claude CLI factory pattern
 
-#### Claude API Features
-- **Model**: claude-3-5-sonnet-20241022
-- **Error Handling**: Retry logic for rate limits and timeouts
-- **Chat Sessions**: Stateful conversation management
+#### Claude CLI Features
+- **CLI Integration**: Uses subprocess to call Claude CLI
+- **Error Handling**: Retry logic for CLI command failures and timeouts
+- **Chat Sessions**: Stateful conversation management with context
 - **Configuration**: Compatible parameter mapping from Gemini settings
-- **Testing**: Comprehensive test suite with >90% coverage
+- **Testing**: Comprehensive test suite with mock and integration tests
