@@ -29,7 +29,15 @@
 2. **環境変数の設定**
    `.env` ファイルを作成し、以下の内容を設定
    ```
+   # AI プロバイダー設定（どちらか1つを選択）
+   ## Gemini を使用する場合（デフォルト）
    GEMINI_API_KEY=your_gemini_api_key
+
+   ## Claude を使用する場合
+   # ANTHROPIC_API_KEY=your_claude_api_key
+   # AI_CLIENT_TYPE=claude
+
+   # その他の設定
    REDDIT_CLIENT_ID=your_reddit_client_id
    REDDIT_CLIENT_SECRET=your_reddit_client_secret
    REDDIT_USER_AGENT=your_reddit_user_agent
@@ -114,6 +122,33 @@
    
    ブラウザでhttp://localhost:8080 にアクセスし、表示を確認。
 
+## 🤖 AIプロバイダーの切り替え
+
+### Claude APIに切り替える場合
+```bash
+# .env ファイルを編集
+ANTHROPIC_API_KEY=your_claude_api_key
+AI_CLIENT_TYPE=claude
+
+# Gemini設定をコメントアウト
+# GEMINI_API_KEY=your_gemini_api_key
+```
+
+### Gemini APIに戻す場合（デフォルト）
+```bash
+# .env ファイルを編集
+GEMINI_API_KEY=your_gemini_api_key
+# AI_CLIENT_TYPE=gemini  # または削除
+
+# Claude設定をコメントアウト
+# ANTHROPIC_API_KEY=your_claude_api_key
+# AI_CLIENT_TYPE=claude
+```
+
+### 対応状況
+- ✅ **Paper Summarizer**: Claude対応完了
+- 🔄 **その他の機能**: 順次対応予定（Tech Feed, Hacker News, Reddit Explorer, Web Viewer）
+
 ↓以下、オリジナルのREADMEです。
 
 ## 🌟 概要
@@ -123,6 +158,8 @@ Nookは、テック系の最新情報を自動的に収集し、要約するWeb�
 Reddit、Hacker News、GitHub Trending、技術ブログ、学術論文など多様な情報源から毎日自動的にコンテンツを収集し、LLMを使用して日本語で要約します。シンプルなWebインターフェースで閲覧でき、各トピックに対してチャット形式でフォローアップ質問も可能です。
 
 1日平均12円の運用費*で情報収集にかかる時間を大幅に削減します。
+
+**✅ 新機能**: Google Gemini と Claude の両方のAIプロバイダーに対応。環境変数で簡単に切り替え可能。
 
 ## 🎬 外観
 
@@ -173,7 +210,9 @@ Reddit、Hacker News、GitHub Trending、技術ブログ、学術論文など多
 - Dockerイメージのビルドが可能な環境
   - `tech_feed`のセットアップにローカルのDockerを使用するらしいです。
 - 以下のAPIキー:
-  - Google Gemini API キー（有償）
+  - **AI プロバイダー**（どちらか1つ）:
+    - Google Gemini API キー（有償）
+    - Claude API キー（有償）
   - Reddit API キー（クライアントID、クライアントシークレット）
 
 </details>
@@ -189,7 +228,15 @@ Reddit、Hacker News、GitHub Trending、技術ブログ、学術論文など多
 2. **環境変数の設定**
    `.env` ファイルを作成し、以下の内容を設定
    ```
+   # AI プロバイダー設定（どちらか1つを選択）
+   ## Gemini を使用する場合（デフォルト）
    GEMINI_API_KEY=your_gemini_api_key
+
+   ## Claude を使用する場合
+   # ANTHROPIC_API_KEY=your_claude_api_key
+   # AI_CLIENT_TYPE=claude
+
+   # その他の設定
    REDDIT_CLIENT_ID=your_reddit_client_id
    REDDIT_CLIENT_SECRET=your_reddit_client_secret
    REDDIT_USER_AGENT=your_reddit_user_agent

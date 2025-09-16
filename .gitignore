@@ -14,3 +14,45 @@ node_modules/
 .env
 
 .DS_Store
+
+# Test coverage reports
+.coverage
+htmlcov/
+coverage.xml
+*.cover
+.hypothesis/
+
+# Logs
+*.log
+logs/
+
+# Output files
+output/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.sublime-*
+.atom/
+
+# Python version management
+.python-version
+
+# Benchmarks
+.benchmarks/
+
+# Claude CLI cache
+.claude/
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+*~
+
+# OS generated files
+Thumbs.db
+ehthumbs.db
+Desktop.ini

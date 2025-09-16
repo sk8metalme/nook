@@ -17,11 +17,11 @@ def run_all():
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     os.environ["OUTPUT_DIR"] = OUTPUT_DIR
 
-    # 各情報源の処理を実行
+    # 各情報源の処理を実行（Reddit APIキーが未設定のためRedditExplorerは除外）
     handlers = [
         PaperSummarizer(),
         HackerNewsRetriever(),
-        RedditExplorer(),
+        # RedditExplorer(),  # Reddit API設定が必要
         GithubTrending(),
         TechFeed(),
     ]

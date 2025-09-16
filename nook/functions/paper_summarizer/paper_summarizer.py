@@ -2,15 +2,17 @@ import concurrent.futures
 import inspect
 import os
 import re
+import traceback
 from dataclasses import dataclass, field
 from datetime import date, timedelta
 from typing import Any
+from pprint import pprint
 from tqdm import tqdm
 
 import arxiv
 import requests
 from bs4 import BeautifulSoup
-from ..common.python.gemini_client import create_client
+from ..common.python.client_factory import create_client
 
 class Config:
     hugging_face_api_url_format = "https://huggingface.co/papers?date={date}"

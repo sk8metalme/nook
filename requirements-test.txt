@@ -1,0 +1,28 @@
+# Testing dependencies for Nook migration
+pytest>=7.4.0
+pytest-mock>=3.11.0
+pytest-asyncio>=0.21.0
+pytest-cov>=4.1.0
+pytest-env>=0.8.0
+pytest-html>=3.2.0
+
+# For mocking HTTP requests and API responses
+responses>=0.23.0
+httpretty>=1.1.0
+
+# For performance testing
+pytest-benchmark>=4.0.0
+
+# For test fixtures and data generation
+factory-boy>=3.3.0
+faker>=19.0.0
+
+# For environment management in tests
+python-dotenv>=1.0.0
+
+# Anthropic SDK for Claude testing
+anthropic>=0.25.0
+
+# Existing dependencies that tests will need
+tenacity>=8.2.0
+google-genai>=0.5.0
