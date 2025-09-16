@@ -4,14 +4,20 @@
 <dict>
     <key>Label</key>
     <string>com.nook.datacollection</string>
-    
+
     <key>ProgramArguments</key>
     <array>
         <string>/bin/bash</string>
         <string>-c</string>
-        <string>cd /Users/arigatatsuya/Work/git/nook && export AI_CLIENT_TYPE=claude && export OUTPUT_DIR="/Users/arigatatsuya/Library/Mobile Documents/iCloud~md~obsidian/Documents/obsidian-iphone/nook" && export PATH="/opt/homebrew/bin:/Users/arigatatsuya/.pyenv/versions/3.12.4/bin:/usr/local/bin:/usr/bin:/bin" && /Users/arigatatsuya/.pyenv/versions/3.12.4/bin/python main.py</string>
+        <string>cd "${NOOK_REPO_DIR:-$HOME/Work/git/nook}" &amp;&amp; \
+if [ -f .env ]; then set -a; source .env; set +a; fi &amp;&amp; \
+LOG_DIR="${NOOK_LOG_DIR:-$HOME/Work/git/nook/logs}"; mkdir -p "$LOG_DIR" &amp;&amp; \
+export AI_CLIENT_TYPE="${AI_CLIENT_TYPE:-claude}" &amp;&amp; \
+export OUTPUT_DIR="${NOOK_OBSIDIAN_DIR:-$HOME}" &amp;&amp; \
+export PATH="${NOOK_PATH_OVERRIDE:-/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin}" &amp;&amp; \
+"${NOOK_PYTHON_BIN:-python3}" main.py &gt;&gt;"$LOG_DIR/datacollection.log" 2&gt;&gt;"$LOG_DIR/datacollection_error.log"</string>
     </array>
-    
+
     <key>StartCalendarInterval</key>
     <dict>
         <key>Hour</key>
@@ -19,29 +25,26 @@
         <key>Minute</key>
         <integer>0</integer>
     </dict>
-    
-    <key>StandardOutPath</key>
-    <string>/Users/arigatatsuya/Work/git/nook/logs/datacollection.log</string>
-    
-    <key>StandardErrorPath</key>
-    <string>/Users/arigatatsuya/Work/git/nook/logs/datacollection_error.log</string>
-    
-    <key>WorkingDirectory</key>
-    <string>/Users/arigatatsuya/Work/git/nook</string>
-    
+
     <key>EnvironmentVariables</key>
     <dict>
         <key>AI_CLIENT_TYPE</key>
         <string>claude</string>
-        <key>OUTPUT_DIR</key>
-        <string>/Users/arigatatsuya/Library/Mobile Documents/iCloud~md~obsidian/Documents/obsidian-iphone/nook</string>
-        <key>PATH</key>
-        <string>/opt/homebrew/bin:/Users/arigatatsuya/.pyenv/versions/3.12.4/bin:/usr/local/bin:/usr/bin:/bin</string>
+        <key>NOOK_REPO_DIR</key>
+        <string></string>
+        <key>NOOK_OBSIDIAN_DIR</key>
+        <string></string>
+        <key>NOOK_LOG_DIR</key>
+        <string></string>
+        <key>NOOK_PYTHON_BIN</key>
+        <string></string>
+        <key>NOOK_PATH_OVERRIDE</key>
+        <string></string>
     </dict>
-    
+
     <key>RunAtLoad</key>
     <false/>
-    
+
     <key>KeepAlive</key>
     <false/>
 </dict>
