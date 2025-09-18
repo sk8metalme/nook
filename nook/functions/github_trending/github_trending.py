@@ -1,6 +1,8 @@
 import os
+import traceback
 from dataclasses import dataclass
 from datetime import date
+from pprint import pprint
 from typing import Any
 
 import requests

@@ -19,6 +19,7 @@ class Config:
     arxiv_id_regex = r"\d{4}\.\d{5}"
     arxiv_ids_s3_key_format = "paper_summarizer/arxiv_ids-{date}.txt"
     summary_index_s3_key_format = "paper_summarizer/{date}.md"
+    max_papers_per_day = 5
 
 def remove_tex_backticks(text: str) -> str:
     r"""
@@ -108,16 +109,12 @@ class PaperSummarizer:
     def __call__(self) -> None:
         new_arxiv_ids = self._paper_id_retriever.retrieve_from_hugging_face()
         new_arxiv_ids = self._remove_duplicates(new_arxiv_ids)
+        if len(new_arxiv_ids) > Config.max_papers_per_day:
+            new_arxiv_ids = new_arxiv_ids[: Config.max_papers_per_day]
         print(f"The number of new arXiv IDs: {len(new_arxiv_ids)}")
         markdowns = []
-        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
-            markdowns = list(
-                tqdm(
-                    executor.map(self._process_paper, new_arxiv_ids),
-                    total=len(new_arxiv_ids),
-                    desc="Summarizing papers",
-                )
-            )
+        for arxiv_id in tqdm(new_arxiv_ids, desc="Summarizing papers"):
+            markdowns.append(self._process_paper(arxiv_id))
         self._save_arxiv_ids(new_arxiv_ids)
         self._store_summaries(markdowns)
 

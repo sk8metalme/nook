@@ -22,7 +22,7 @@ _MARKDOWN_FORMAT = """
 """
 
 class Config:
-    reddit_top_posts_limit = 10
+    reddit_top_posts_limit = 5
     reddit_top_comments_limit = 3
     summary_index_s3_key_format = "reddit_explorer/{date}.md"
 
