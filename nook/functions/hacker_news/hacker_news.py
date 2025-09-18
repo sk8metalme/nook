@@ -25,7 +25,7 @@ _MARKDOWN_FORMAT = """
 class Config:
     hacker_news_top_stories_url = "https://hacker-news.firebaseio.com/v0/topstories.json"
     hacker_news_item_url = "https://hacker-news.firebaseio.com/v0/item/{story_id}.json"
-    hacker_news_num_top_stories = 30
+    hacker_news_num_top_stories = 10
     summary_index_s3_key_format = "hacker_news/{date}.md"
 
 @dataclass

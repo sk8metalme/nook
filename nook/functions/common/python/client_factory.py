@@ -62,15 +62,42 @@ def _create_gemini_client(config: dict[str, Any] | None = None, **kwargs) -> Gem
 
 def _create_claude_cli_client(config: dict[str, Any] | None = None, **kwargs) -> ClaudeCLIClient:
     """Create a Claude CLI client with the given configuration."""
+    params: dict[str, Any] = {
+        "model": "claude-3-5-sonnet-20241022",
+        "temperature": 1.0,
+        "max_tokens": 8192,
+        "timeout": 120,
+        "max_prompt_chars": None,
+        "min_request_interval_seconds": None,
+    }
+
     if config:
-        # Convert config dict to ClaudeCLIConfig
-        claude_config = ClaudeCLIConfig(
-            model=config.get("model", "claude-3-5-sonnet-20241022"),
-            temperature=config.get("temperature", 1.0),
-            max_tokens=config.get("max_tokens", 8192),
-            timeout=config.get("timeout", 60)
-        )
-    else:
-        claude_config = None
+        params.update({k: v for k, v in config.items() if k in params})
+
+    env_overrides = {
+        "model": os.environ.get("CLAUDE_MODEL"),
+        "temperature": os.environ.get("CLAUDE_TEMPERATURE"),
+        "max_tokens": os.environ.get("CLAUDE_MAX_OUTPUT_TOKENS"),
+        "timeout": os.environ.get("CLAUDE_TIMEOUT_SECONDS"),
+        "max_prompt_chars": os.environ.get("CLAUDE_MAX_PROMPT_CHARS"),
+        "min_request_interval_seconds": os.environ.get("CLAUDE_MIN_REQUEST_INTERVAL_SECONDS"),
+    }
+
+    for key, value in env_overrides.items():
+        if value is None:
+            continue
+        try:
+            if key in {"temperature"}:
+                params[key] = float(value)
+            elif key in {"max_tokens", "timeout", "max_prompt_chars"}:
+                params[key] = int(value)
+            elif key in {"min_request_interval_seconds"}:
+                params[key] = float(value)
+            else:
+                params[key] = value
+        except ValueError:
+            continue
+
+    claude_config = ClaudeCLIConfig(**params)
 
     return create_claude_cli_client(claude_config, **kwargs)

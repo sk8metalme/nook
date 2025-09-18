@@ -14,6 +14,7 @@ from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Union
 
 from tenacity import retry, stop_after_attempt, wait_exponential
+import threading
 
 
 @dataclass
@@ -26,6 +27,8 @@ class ClaudeCLIConfig:
     timeout: int = 120  # Claude CLIは応答に時間がかかるため120秒に延長
     retry_attempts: int = 3
     skip_permissions: bool = True  # 権限チェックをスキップしてパフォーマンス向上
+    max_prompt_chars: Optional[int] = None  # 送信前にプロンプトをトリミングする上限
+    min_request_interval_seconds: Optional[float] = None  # 連続呼び出し間隔の下限
     
     def __post_init__(self) -> None:
         """Validate configuration parameters."""
@@ -35,6 +38,10 @@ class ClaudeCLIConfig:
             raise ValueError("Max tokens must be positive")
         if self.timeout <= 0:
             raise ValueError("Timeout must be positive")
+        if self.max_prompt_chars is not None and self.max_prompt_chars <= 0:
+            raise ValueError("max_prompt_chars must be positive when provided")
+        if self.min_request_interval_seconds is not None and self.min_request_interval_seconds < 0:
+            raise ValueError("min_request_interval_seconds must be non-negative when provided")
 
 
 class ClaudeCLIError(Exception):
@@ -83,6 +90,11 @@ class ClaudeCLIClient:
         
         # Initialize session state
         self._session_history: List[Dict[str, str]] = []
+
+        # rate limiting
+        if not hasattr(self.__class__, "_request_lock"):
+            self.__class__._request_lock = threading.Lock()
+            self.__class__._last_request_ts = 0.0
     
     def _check_claude_cli_availability(self) -> None:
         """Check if Claude CLI is installed and available."""
@@ -135,6 +147,9 @@ class ClaudeCLIClient:
             If the command fails.
         """
         # Prepare the full prompt
+        prompt, system_instruction = self._enforce_prompt_limit(prompt, system_instruction)
+        self._throttle_if_needed()
+
         full_prompt = prompt
         if system_instruction:
             full_prompt = f"System: {system_instruction}\n\nUser: {prompt}"
@@ -142,6 +157,9 @@ class ClaudeCLIClient:
         try:
             # Prepare Claude CLI command with optimized options
             cmd = ["claude", "-p"]
+
+            if self.config.model:
+                cmd.extend(["--model", self.config.model])
             
             # Add performance optimization options
             if self.config.skip_permissions:
@@ -152,7 +170,7 @@ class ClaudeCLIClient:
             
             # Add the prompt
             cmd.append(full_prompt)
-            
+
             # Execute Claude CLI command
             result = subprocess.run(
                 cmd,
@@ -217,6 +235,49 @@ class ClaudeCLIClient:
             
         except Exception as e:
             raise ClaudeCLIError(f"Failed to generate content: {str(e)}") from e
+
+    def _enforce_prompt_limit(
+        self,
+        prompt: str,
+        system_instruction: Optional[str],
+    ) -> tuple[str, Optional[str]]:
+        """Truncate the user prompt if it exceeds the configured character limit."""
+
+        limit = self.config.max_prompt_chars
+        if not limit:
+            return prompt, system_instruction
+
+        # When system instruction is present, keep it intact and only trim user prompt.
+        prefix_length = 0
+        if system_instruction:
+            prefix_length = len("System: \n\nUser: ") + len(system_instruction)
+
+        available_for_prompt = max(limit - prefix_length, 0)
+        if len(prompt) <= available_for_prompt or available_for_prompt == 0:
+            if available_for_prompt == 0:
+                truncated_notice = "[入力テキストは長すぎるため全体を送信できませんでした]"
+                return truncated_notice[:limit], system_instruction
+            return prompt, system_instruction
+
+        truncated_prompt = prompt[:available_for_prompt]
+        truncated_prompt = truncated_prompt.rstrip()
+        truncated_prompt += "\n\n[入力テキストは CLAUDE_MAX_PROMPT_CHARS の制限により途中までで送信されています]"
+        return truncated_prompt, system_instruction
+
+    def _throttle_if_needed(self) -> None:
+        interval = self.config.min_request_interval_seconds
+        if not interval or interval <= 0:
+            return
+
+        lock = getattr(self.__class__, "_request_lock")
+        with lock:
+            last_ts = getattr(self.__class__, "_last_request_ts", 0.0)
+            now = time.monotonic()
+            wait = interval - (now - last_ts)
+            if wait > 0:
+                time.sleep(wait)
+                now = time.monotonic()
+            self.__class__._last_request_ts = now
     
     def chat_with_search(self, message: str) -> str:
         """

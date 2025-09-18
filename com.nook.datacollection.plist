@@ -9,12 +9,14 @@
     <array>
         <string>/bin/bash</string>
         <string>-c</string>
-        <string>cd "${NOOK_REPO_DIR:-$HOME/Work/git/nook}" &amp;&amp; \
+        <string>cd "${NOOK_REPO_DIR:-~/Work/git/nook}" &amp;&amp; \
 if [ -f .env ]; then set -a; source .env; set +a; fi &amp;&amp; \
-LOG_DIR="${NOOK_LOG_DIR:-$HOME/Work/git/nook/logs}"; mkdir -p "$LOG_DIR" &amp;&amp; \
+LOG_DIR="${NOOK_LOG_DIR:-~/Work/git/nook/logs}"; mkdir -p "$LOG_DIR" &amp;&amp; \
 export AI_CLIENT_TYPE="${AI_CLIENT_TYPE:-claude}" &amp;&amp; \
-export OUTPUT_DIR="${NOOK_OBSIDIAN_DIR:-$HOME}" &amp;&amp; \
+export OUTPUT_DIR="${NOOK_OBSIDIAN_DIR:-~/Library/Mobile Documents/iCloud~md~obsidian/Documents/obsidian-iphone/nook}" &amp;&amp; \
 export PATH="${NOOK_PATH_OVERRIDE:-/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin}" &amp;&amp; \
+USER_SITE="$("${NOOK_PYTHON_BIN:-python3}" -m site --user-site 2&gt;/dev/null)" &amp;&amp; \
+if [ -n "$USER_SITE" ]; then export PYTHONPATH="$USER_SITE${PYTHONPATH:+:${PYTHONPATH}}"; fi &amp;&amp; \
 "${NOOK_PYTHON_BIN:-python3}" main.py &gt;&gt;"$LOG_DIR/datacollection.log" 2&gt;&gt;"$LOG_DIR/datacollection_error.log"</string>
     </array>
 

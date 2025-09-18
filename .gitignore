@@ -28,6 +28,7 @@ logs/
 
 # Output files
 output/
+nook/functions/hacker_news/\$HOME/
 
 # IDE and editor files
 .vscode/
